@@ -1,4 +1,4 @@
-secret-octo-ninja
+[Unnamed Project - Rename later]
 =================
 
 Collaborative coding application - SoftSys Spring '12
