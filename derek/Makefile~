@@ -1,0 +1,2 @@
+testqt:		testqt.cpp
+	g++ -m64 -o testqt testqt.cpp `pkg-config --cflags --libs QtCore QtGui`
