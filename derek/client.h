@@ -1,7 +1,5 @@
-#ifndef TESTQT_H
-#define TESTQT_H
- 
-//int add(int x, int y); // function prototype for add.h
+#ifndef CLIENT_H
+#define CLIENT_H
 
 class OnKeyPress: public QObject{
 public:
@@ -9,5 +7,7 @@ public:
 };
 
 int receiveEvent(int pos, int event);
+int sendEvent(int pos, int event);
+void saveData();
 
 #endif
