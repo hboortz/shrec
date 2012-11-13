@@ -1,4 +1,6 @@
 /// client.h
+#ifndef NET_CLIENT_H
+#define NET_CLIENT_H
 #include <QtNetwork>
 #include <QObject>
 #include <QString>
@@ -18,3 +20,4 @@ private:
 };
 
 
+#endif

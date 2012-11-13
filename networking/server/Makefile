@@ -1,6 +1,6 @@
 server: server.cpp server.h
-	clang `pkg-config --cflags --libs QtCore QtGui QtNetwork` -c server.cpp -o server.o
+	clang -c server.cpp -o server.o `pkg-config --cflags --libs QtCore QtGui QtNetwork`
 
 main: server.cpp server.h main.cpp
-	clang `pkg-config --cflags --libs QtCore QtGui QtNetwork` -o server main.cpp 
+	clang -o server main.cpp `pkg-config --cflags --libs QtCore QtGui QtNetwork`
 

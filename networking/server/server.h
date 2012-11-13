@@ -1,3 +1,6 @@
+#ifndef NET_SERV_H
+#define NET_SERV_H
+
 #include <QtNetwork>
 #include <QObject>
 #include <QTcpServer>
@@ -16,3 +19,5 @@ private:
   QTcpServer server;
   QTcpSocket* client;
 };
+
+#endif
