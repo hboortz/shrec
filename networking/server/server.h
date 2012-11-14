@@ -2,6 +2,7 @@
 #define NET_SERV_H
 
 #include <QtNetwork>
+#include <QtGui/QApplication>
 #include <QObject>
 #include <QTcpServer>
 #include <QTcpSocket>

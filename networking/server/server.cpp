@@ -28,7 +28,7 @@ void Server::startRead()
 {
   char buffer[1024] = {0};
   client->read(buffer, client->bytesAvailable());
-  cout << buffer >> endl;
+  cout << buffer << endl;
   client->close();
 }
 

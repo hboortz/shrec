@@ -9,8 +9,8 @@
 
 class Client: public QObject
 {
-//Q_OBJECT
-//had to remove this, otherwise we needed a .moc file ?????
+Q_OBJECT
+
 public:
   Client(QObject* parent = 0);
   ~Client();
