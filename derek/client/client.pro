@@ -10,3 +10,4 @@ INCLUDEPATH += .
 # Input
 HEADERS += client.h
 SOURCES += client.cpp
+QT += network

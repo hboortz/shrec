@@ -4,6 +4,9 @@
 #include <QtGui/QApplication>
 #include <QtGui/QTextEdit>
 #include <QtGui/QKeyEvent>
+#include <QTcpServer>
+#include <QTcpSocket>
+#include <QtNetwork>
 #include <QObject>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,11 +14,33 @@
 #include <iostream>
 
 class KeyPressListener: public QObject{
+Q_OBJECT
 public:
     bool eventFilter(QObject *obj, QEvent *event);
+signals:
+    void signalWrite();
 };
+
+class Server: public QObject
+{
+Q_OBJECT
+public:
+  Server(QObject * parent = 0);
+  ~Server();
+  void connect_signal(void *ref);
+public slots:
+  void acceptConnection();
+  void startRead();
+  void writeData();
+private:
+  QTcpServer server;
+  QTcpSocket* client;
+};
+
+
 
 int receiveEvent(int pos, int event);
 int sendEvent(int pos, int event);
+void saveData();
 
 #endif
