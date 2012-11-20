@@ -75,23 +75,42 @@ bool KeyPressListener::eventFilter(QObject *obj, QEvent *event){
     //called when textEdit has an event
     if (event->type() == QEvent::KeyPress) {
         //emit signalWrite();
+        return true;
     }
     return false; //server cannot interact with code
 }
 
 int receiveEvent(Event event){
     //called when the app receives an event from the server
-    //currently only inserts characters using event as the char code
     //returns 0 for no error
-    QTextCursor cursor = textEdit->textCursor();
-    QString text = QString(1,(char)event.nvk);
-    //QString text = QString("a");
-    cursor.setPosition(event.pos,QTextCursor::MoveAnchor);
-    textEdit->setTextCursor(cursor);
-    textEdit->insertPlainText(text);
-    printf("%s",text.data());
-    //saveData();
+    QString text;
+    if (event.nvk>=33 && event.nvk<=126){
+        text = QString(1,(char)event.nvk);
+    } else if (event.nvk==65293) { //enter
+        text = QString("\n");
+    } else if (event.nvk==65288) {
+        text = QString("bksp");
+    } else if (event.nvk==65535) {
+        text = QString("del");
+    } else {
+        text = QString("");
+    }
+    executeEvent(event.pos,text);
     return(0);
+}
+
+void executeEvent(int pos, QString string){
+    QTextCursor cursor = textEdit->textCursor();
+    cursor.setPosition(pos,QTextCursor::MoveAnchor);
+    textEdit->setTextCursor(cursor);
+    if (string == "bksp") {
+        cursor.deletePreviousChar();
+    } else if (string == "del") {
+        cursor.deleteChar();
+    } else {
+        textEdit->insertPlainText(string);
+    }
+    //saveData();
 }
 
 void saveData(){

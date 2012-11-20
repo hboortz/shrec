@@ -43,6 +43,7 @@ private:
 };
 
 
+void executeEvent(int pos, QString string);
 Event stringToEvent(char *string);
 int receiveEvent(Event event);
 int sendEvent(int pos, int event);

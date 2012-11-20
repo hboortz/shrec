@@ -76,12 +76,12 @@ bool KeyPressListener::eventFilter(QObject *obj, QEvent *event){
         int nvk = keyEvent->nativeVirtualKey(); //extract NVK (useful because distinct upper/lower values)
         int pos = textEdit->textCursor().position();
         qDebug("NVK: %d",nvk);
-        if (key>=65 && key<=90){ //alpha key
-            Event event = {
-                .nvk = nvk,
-                .pos = pos
-            };
-            emit signalWrite(event);
+        Event event = {
+            .nvk = nvk,
+            .pos = pos
+        };
+        emit signalWrite(event);
+        if (nvk>=33 && nvk<=126){ //alpha key
             receiveEvent(pos,nvk);
             qDebug("Ate key press %d", key);
             qDebug("Character: %s", (char*)keyEvent->text().data());
