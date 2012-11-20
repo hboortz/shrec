@@ -4,6 +4,7 @@
 QString databuf;
 QString filename;
 QTextEdit *textEdit;
+Client client;
 
 
 //----------------------------------------------------------
@@ -17,6 +18,17 @@ Client::Client(QObject* parent): QObject(parent)
 Client::~Client()
 {
   client.close();
+}
+
+void Client::connect_signal(void *ref){
+    connect((KeyPressListener*)ref, SIGNAL(signalWrite(Event)),this, SLOT(writeData(Event)));
+}
+
+void Client::writeData(Event event)
+{
+    puts("writing");
+    char *eventString = eventToString(event);
+    client.write(eventString);
 }
 
 void Client::start(QString address, quint16 port)
@@ -37,7 +49,20 @@ void Client::startRead()
   char buffer[1024] = {0};
   client.read(buffer, client.bytesAvailable());
   printf("%s\n",buffer);
-  //client.close();
+}
+
+char *eventToString(Event event)
+{
+    char *pos = (char*)malloc(sizeof(char)*14);
+    char *nvk = (char*)malloc(sizeof(char)*7);
+    char *string = (char*)malloc(sizeof(char)*21);
+    sprintf(pos,"%i",event.pos);
+    sprintf(nvk,"%i",event.nvk);
+    strcpy(string,pos);
+    strcat(string,"|");
+    strcat(string,nvk);
+    printf("%s\n",string);
+    return(string);
 }
 
 //---------------------------------------------------------------
@@ -51,8 +76,12 @@ bool KeyPressListener::eventFilter(QObject *obj, QEvent *event){
         int nvk = keyEvent->nativeVirtualKey(); //extract NVK (useful because distinct upper/lower values)
         int pos = textEdit->textCursor().position();
         qDebug("NVK: %d",nvk);
-        emit signalWrite(pos,nvk);
         if (key>=65 && key<=90){ //alpha key
+            Event event = {
+                .nvk = nvk,
+                .pos = pos
+            };
+            emit signalWrite(event);
             receiveEvent(pos,nvk);
             qDebug("Ate key press %d", key);
             qDebug("Character: %s", (char*)keyEvent->text().data());
@@ -110,13 +139,21 @@ int sendEvent(int pos, int event){
 }
 
 int main(int argv, char **args){
+    Event event = {
+        .nvk = 5,
+        .pos = 23
+    };
+    //event->nvk=5;
+    //event->pos=23;
+    eventToString(event);
+
     filename=QString("test.txt");
     QApplication app(argv,args);
-    Client client;
     client.start("127.0.0.1", 8888);
     databuf=QString();
     textEdit = new QTextEdit();
     KeyPressListener *keylisten = new KeyPressListener();
+    client.connect_signal(keylisten);
     textEdit->installEventFilter(keylisten);
     textEdit->show();
     

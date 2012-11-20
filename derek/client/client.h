@@ -16,6 +16,21 @@
 #include <string.h>
 #include <QHostAddress>
 
+typedef struct {
+    int nvk;
+    int pos;
+} Event;
+
+
+class KeyPressListener: public QObject{
+Q_OBJECT
+public:
+    bool eventFilter(QObject *obj, QEvent *event);
+signals:
+    void signalWrite(Event event);
+};
+
+
 class Client: public QObject
 {
 Q_OBJECT
@@ -24,21 +39,18 @@ public:
   Client(QObject* parent = 0);
   ~Client();
   void start(QString address, quint16 port);
+  void connect_signal(void *ref);
 public slots:
   void init();
   void startRead();
+  void writeData(Event event);
 private:
   QTcpSocket client;
 };
 
-class KeyPressListener: public QObject{
-Q_OBJECT
-public:
-    bool eventFilter(QObject *obj, QEvent *event);
-signals:
-    void signalWrite(int pos,int event)
-};
 
+
+char *eventToString(Event event);
 int receiveEvent(int pos, int event);
 int sendEvent(int pos, int event);
 void saveData();

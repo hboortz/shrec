@@ -44,8 +44,29 @@ void Server::startRead()
 {
   char buffer[1024] = {0};
   client->read(buffer, client->bytesAvailable());
+  receiveEvent(stringToEvent(buffer));
   cout << buffer << endl;
   //client->close();
+}
+
+Event stringToEvent(char *string){
+    int i = 0;
+    int j;
+    char *pos = (char*)malloc(sizeof(char)*14);
+    char *nvk = (char*)malloc(sizeof(char)*7);
+    while(string[i] != '|'){
+        i++;
+    }
+    strncpy(pos,string,i);
+    pos[i]='\0';
+    j=strlen(string)-i-1;
+    strncpy(nvk,&string[i+1],j);
+    nvk[j]='\0';
+    Event event = {
+        .nvk = atoi(nvk),
+        .pos = atoi(pos)
+    };
+    return(event);
 }
 
 //-----------------------------------------------------------------
@@ -55,19 +76,21 @@ bool KeyPressListener::eventFilter(QObject *obj, QEvent *event){
     if (event->type() == QEvent::KeyPress) {
         //emit signalWrite();
     }
-    return true; //server cannot interact with code
+    return false; //server cannot interact with code
 }
 
-int receiveEvent(int pos, int event){
+int receiveEvent(Event event){
     //called when the app receives an event from the server
     //currently only inserts characters using event as the char code
     //returns 0 for no error
     QTextCursor cursor = textEdit->textCursor();
-    QString text = QString(1,(char)event);
-    cursor.setPosition(pos,QTextCursor::MoveAnchor);
+    QString text = QString(1,(char)event.nvk);
+    //QString text = QString("a");
+    cursor.setPosition(event.pos,QTextCursor::MoveAnchor);
     textEdit->setTextCursor(cursor);
     textEdit->insertPlainText(text);
-    saveData();
+    printf("%s",text.data());
+    //saveData();
     return(0);
 }
 
@@ -91,6 +114,7 @@ int sendEvent(int pos, int event){
 
 int main(int argv, char **args){
     QApplication app(argv,args);
+    stringToEvent("5345987652|1461");
     filename=QString("test.txt");
     databuf=QString();
     textEdit = new QTextEdit();
