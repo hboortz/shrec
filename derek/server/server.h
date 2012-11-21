@@ -33,6 +33,8 @@ public:
   Server(QObject * parent = 0);
   ~Server();
   void connect_signal(void *ref);
+  int receiveEvent(Event event);
+  void broadcastEvent(Event event);
 public slots:
   void acceptConnection();
   void startRead();
@@ -42,10 +44,9 @@ private:
   QTcpSocket* client;
 };
 
-
 void executeEvent(int pos, QString string);
+char *eventToString(Event event);
 Event stringToEvent(char *string);
-int receiveEvent(Event event);
 int sendEvent(int pos, int event);
 void saveData();
 

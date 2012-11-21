@@ -48,7 +48,27 @@ void Client::startRead()
 {
   char buffer[1024] = {0};
   client.read(buffer, client.bytesAvailable());
+  receiveEvent(stringToEvent(buffer));
   printf("%s\n",buffer);
+}
+
+int Client::receiveEvent(Event event){
+    //called when the app receives an event from the server
+    //returns 0 for no error
+    QString text;
+    if (event.nvk>=33 && event.nvk<=126){
+        text = QString(1,(char)event.nvk);
+    } else if (event.nvk==65293) { //enter
+        text = QString("\n");
+    } else if (event.nvk==65288) { //backspace
+        text = QString("bksp");
+    } else if (event.nvk==65535) { //delete
+        text = QString("del");
+    } else {
+        text = QString("");
+    }
+    executeEvent(event.pos,text);
+    return(0);
 }
 
 char *eventToString(Event event)
@@ -63,6 +83,28 @@ char *eventToString(Event event)
     strcat(string,nvk);
     printf("%s\n",string);
     return(string);
+}
+
+Event stringToEvent(char *string){
+    int i = 0;
+    int j;
+    //changed values because buffer overflow on rapid keystrokes;
+    //fix error and change back eventually
+    char *pos = (char*)malloc(sizeof(char)*140); //used to be 14
+    char *nvk = (char*)malloc(sizeof(char)*70); //used to be 7
+    while(string[i] != '|'){
+        i++;
+    }
+    strncpy(pos,string,i);
+    pos[i]='\0';
+    j=strlen(string)-i-1;
+    strncpy(nvk,&string[i+1],j);
+    nvk[j]='\0';
+    Event event = {
+        .nvk = atoi(nvk),
+        .pos = atoi(pos)
+    };
+    return(event);
 }
 
 //---------------------------------------------------------------
@@ -81,27 +123,30 @@ bool KeyPressListener::eventFilter(QObject *obj, QEvent *event){
             .pos = pos
         };
         emit signalWrite(event);
-        if (nvk>=33 && nvk<=126){ //alpha key
-            receiveEvent(pos,nvk);
-            qDebug("Ate key press %d", key);
-            qDebug("Character: %s", (char*)keyEvent->text().data());
-            qDebug("Cursor position: %i\n",pos);
-            //textEdit->textCursor().insertText(keyEvent->text()); //allow text insertion
-            //databuf=textEdit->toPlainText(); //may not be necessary...
-            //qDebug() << databuf;
-            saveData();
-            return true;
-        } else {
-            //test code: uncomment to insert A at the 
-            //  start of the line on non-alpha keypress
-            //receiveEvent(0,65);
-            //return true;
-            saveData();
+        if (nvk>=65361 && nvk<=65364){
             return false;
+        } else {
+            return true;
         }
     } else {
         return QObject::eventFilter(obj, event);
     }
+}
+
+void executeEvent(int pos, QString string){
+    QTextCursor oldcursor = textEdit->textCursor();
+    QTextCursor tempcursor = textEdit->textCursor();
+    tempcursor.setPosition(pos,QTextCursor::MoveAnchor);
+    textEdit->setTextCursor(tempcursor);
+    if (string == "bksp") {
+        tempcursor.deletePreviousChar();
+    } else if (string == "del") {
+        tempcursor.deleteChar();
+    } else {
+        textEdit->insertPlainText(string);
+    }
+    textEdit->setTextCursor(oldcursor);
+    saveData();
 }
 
 void saveData(){
@@ -114,22 +159,6 @@ void saveData(){
     qfile.write(contents.toLocal8Bit().data());
     qfile.close();
     fclose(file);
-}
-
-int receiveEvent(int pos, int event){
-    //called when the app receives an event from the server
-    //currently only inserts characters using event as the char code
-    //returns 0 for no error
-    qDebug("update");
-    QTextCursor oldcursor = textEdit->textCursor();
-    QTextCursor newcursor = textEdit->textCursor();
-    QString text = QString(1,(char)event);
-    newcursor.setPosition(pos,QTextCursor::MoveAnchor);
-    textEdit->setTextCursor(newcursor);
-    textEdit->insertPlainText(text);
-    textEdit->setTextCursor(oldcursor);
-    saveData();
-    return(0);
 }
 
 int sendEvent(int pos, int event){

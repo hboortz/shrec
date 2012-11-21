@@ -40,6 +40,7 @@ public:
   ~Client();
   void start(QString address, quint16 port);
   void connect_signal(void *ref);
+  int receiveEvent(Event event);
 public slots:
   void init();
   void startRead();
@@ -49,8 +50,9 @@ private:
 };
 
 
-
+void executeEvent(int pos, QString string);
 char *eventToString(Event event);
+Event stringToEvent(char *string);
 int receiveEvent(int pos, int event);
 int sendEvent(int pos, int event);
 void saveData();
