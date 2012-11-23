@@ -68,7 +68,7 @@ int Server::receiveEvent(Event event){
     //called when the app receives an event from the server
     //returns 0 for no error
     QString text;
-    if (event.nvk>=33 && event.nvk<=126){
+    if (event.nvk>=32 && event.nvk<=126){
         text = QString(1,(char)event.nvk);
     } else if (event.nvk==65293) { //enter
         text = QString("\n");

@@ -56,7 +56,7 @@ int Client::receiveEvent(Event event){
     //called when the app receives an event from the server
     //returns 0 for no error
     QString text;
-    if (event.nvk>=33 && event.nvk<=126){
+    if (event.nvk>=32 && event.nvk<=126){
         text = QString(1,(char)event.nvk);
     } else if (event.nvk==65293) { //enter
         text = QString("\n");
@@ -146,6 +146,24 @@ void executeEvent(int pos, QString string){
         textEdit->insertPlainText(string);
     }
     textEdit->setTextCursor(oldcursor);
+
+    //Experimental block of code concerning text highlighting
+    //----------------------------------------------------
+    QTextEdit::ExtraSelection highlight;
+    highlight.cursor = textEdit->textCursor();
+    highlight.cursor.setPosition(pos,QTextCursor::MoveAnchor);
+    highlight.cursor.setPosition(pos+1,QTextCursor::KeepAnchor);
+    highlight.format = textEdit->currentCharFormat();
+    if(pos%2==0){
+        highlight.format.setBackground(Qt::green);
+    }else{
+        highlight.format.setBackground(Qt::red);
+    }
+    QList<QTextEdit::ExtraSelection> extras;
+    extras << highlight;
+    textEdit->setExtraSelections( extras );
+    //------------------------------------------------------
+
     saveData();
 }
 
