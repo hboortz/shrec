@@ -1,4 +1,4 @@
 [Unnamed Project - Rename later]
 =================
 
-Collaborative coding application - SoftSys Spring '12
+Collaborative coding application - SoftSys Fall '12
