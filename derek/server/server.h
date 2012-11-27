@@ -12,11 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
-
-typedef struct {
-    int nvk;
-    int pos;
-} Event;
+#include "../common.h"
 
 class KeyPressListener: public QObject{
 Q_OBJECT
@@ -45,8 +41,6 @@ private:
 };
 
 void executeEvent(int pos, QString string);
-char *eventToString(Event event);
-Event stringToEvent(char *string);
 int sendEvent(int pos, int event);
 void saveData();
 

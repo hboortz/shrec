@@ -15,11 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <QHostAddress>
-
-typedef struct {
-    int nvk;
-    int pos;
-} Event;
+#include "../common.h"
 
 
 class KeyPressListener: public QObject{
@@ -51,8 +47,6 @@ private:
 
 
 void executeEvent(int pos, QString string);
-char *eventToString(Event event);
-Event stringToEvent(char *string);
 int receiveEvent(int pos, int event);
 int sendEvent(int pos, int event);
 void saveData();

@@ -8,6 +8,6 @@ DEPENDPATH += .
 INCLUDEPATH += .
 
 # Input
-HEADERS += server.h
-SOURCES += server.cpp
+HEADERS += server.h ../common.h
+SOURCES += server.cpp ../common.cpp
 QT += network

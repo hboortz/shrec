@@ -1,12 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <iostream>
-
-typedef struct {
-    int nvk;
-    int pos;
-} Event;
+#include "common.h"
 
 char *eventToString(Event event)
 {
