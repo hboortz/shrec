@@ -8,7 +8,9 @@
  #include <QApplication>
  #include <QtGui>
  #include "mainwindow.h"
-
+ #include "highlighter.h"
+ #include <iostream>
+ #include <algorithm>
  int main(int argc, char *argv[])
  {
      QApplication app(argc, argv);
