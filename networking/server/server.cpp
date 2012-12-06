@@ -45,20 +45,60 @@ void Server::acceptConnection()
 
 void Server::startRead()
 {
-  QTcpSocket *readClient = qobject_cast<QTcpSocket *>(sender());
-  puts("reading");
-  char buffer[10240] = {0};
-  readClient->read(buffer, readClient->bytesAvailable());
-  printf("%s\n",buffer);
-  receiveEvent(stringToEvent(buffer));
-  cout << buffer << endl;
-  //client->close();
+    QTcpSocket *readClient = qobject_cast<QTcpSocket *>(sender());
+    puts("reading");
+    char *buffer = (char*)malloc(sizeof(char)*10240);
+    int bytesAvail = readClient->bytesAvailable();
+    readClient->read(buffer, bytesAvail);
+    buffer[bytesAvail] = '\0';
+    printf("%s\n",buffer);
+    int bytesPushed=0;
+    int *size=(int*)malloc(sizeof(int));
+    Action *action = (Action*)malloc(sizeof(int));
+    char *msg;
+
+    //loop through the available messages
+    while(bytesPushed<bytesAvail){
+    *size=0;
+    popMetadata(&buffer,action,size,&msg);
+    printf("Msg: %s\n",msg);
+    bytesPushed+=(*size+8);
+    if(bytesPushed<=bytesAvail){
+        
+        printf("Bytes pushed: %i, Bytes available: %i\n",bytesPushed,bytesAvail);
+        if(bytesPushed<bytesAvail){
+            printf("Msg: %s\nData remaining: %s\n",msg,buffer);
+        } else {
+            printf("Msg: %s\n",msg);
+        }
+        switch(*action) {
+            case KEY_EVENT:
+                receiveEvent(stringToEvent(msg));
+                break;
+            default:
+                puts("We don't take your kind here.");
+                break;
+        }
+        addMetadata(*action,msg);
+        printf("Sending: %s\n",msg);
+        broadcastAction(msg);
+    } else {
+        puts("Well, that went badly.");
+    }
+    }
+
+    //make 2 readQueue s
+    //make a readQueue execution loop
+
+    //receiveEvent(stringToEvent(buffer));
+    //cout << buffer << endl;
+    //client->close();
 }
 
-void Server::broadcastEvent(Event event)
+void Server::broadcastAction(char *string)
 {
     int i;
-    char *string = eventToString(event);
+    //char *string = eventToString(event);
     for(i=0;i<numclients;i++){
         clients[i]->write(string);
     }
@@ -79,7 +119,7 @@ int Server::receiveEvent(Event event){
     } else {
         text = QString("");
     }
-    broadcastEvent(event);
+    //broadcastAction(eventToString(event));
     executeEvent(event.pos,text);
     return(0);
 }

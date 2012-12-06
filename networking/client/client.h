@@ -35,12 +35,13 @@ public:
   Client(QObject* parent = 0);
   ~Client();
   void start(QString address, quint16 port);
-  void connect_signal(void *ref);
+  void connect_signal(void *ref1, void *ref2);
   int receiveEvent(Event event);
 public slots:
   void init();
   void startRead();
   void writeData(Event event);
+  void cursorPositionChanged();
 private:
   QTcpSocket client;
 };

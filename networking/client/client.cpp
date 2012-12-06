@@ -5,6 +5,7 @@ QString databuf;
 QString filename;
 QTextEdit *textEdit;
 Client client;
+int cursor_locked = 0;
 
 
 //----------------------------------------------------------
@@ -20,15 +21,27 @@ Client::~Client()
   client.close();
 }
 
-void Client::connect_signal(void *ref){
-    connect((KeyPressListener*)ref, SIGNAL(signalWrite(Event)),this, SLOT(writeData(Event)));
+void Client::cursorPositionChanged() {
+    if(!cursor_locked) {
+        puts("Position changed.");
+    }
+}
+
+void Client::connect_signal(void *ref1, void *ref2){
+    connect((KeyPressListener*)ref1, SIGNAL(signalWrite(Event)),this, SLOT(writeData(Event)));
+    connect((QTextEdit*)ref2, SIGNAL(cursorPositionChanged()), this, SLOT(cursorPositionChanged()));
 }
 
 void Client::writeData(Event event)
 {
     puts("writing");
-    char *eventString = eventToString(event);
+    char *eventString = (char*)malloc(sizeof(char)*1024); //change size!
+    strcpy(eventString,eventToString(event));
+    Action action = KEY_EVENT;
+    addMetadata(action,eventString);
+    printf("%s\n",eventString);
     client.write(eventString);
+    //client.waitForBytesWritten();
 }
 
 void Client::start(QString address, quint16 port)
@@ -46,10 +59,44 @@ void Client::init()
 
 void Client::startRead()
 {
-  char buffer[1024] = {0};
-  client.read(buffer, client.bytesAvailable());
-  receiveEvent(stringToEvent(buffer));
-  printf("%s\n",buffer);
+    puts("reading");
+    char *buffer = (char*)malloc(sizeof(char)*10240);
+    int bytesAvail = client.bytesAvailable();
+    client.read(buffer, bytesAvail);
+    buffer[bytesAvail] = '\0';
+    printf("Buffer: %s\n",buffer);
+    int bytesPushed=0;
+    int *size=(int*)malloc(sizeof(int));
+    Action *action = (Action*)malloc(sizeof(int));
+    char *msg;
+
+    //loop through the available messages
+    while(bytesPushed<bytesAvail){
+    *size=0;
+    popMetadata(&buffer,action,size,&msg);
+    printf("Msg: %s\n",msg);
+    bytesPushed+=(*size+8);
+    if(bytesPushed<=bytesAvail){
+        
+        printf("Bytes pushed: %i, Bytes available: %i\n",bytesPushed,bytesAvail);
+        if(bytesPushed<bytesAvail){
+            printf("Msg: %s\nData remaining: %s\n",msg,buffer);
+        } else {
+            printf("Msg: %s\n",msg);
+        }
+        switch(*action) {
+            case KEY_EVENT:
+                receiveEvent(stringToEvent(msg));
+                break;
+            default:
+                puts("We don't take your kind here.");
+                break;
+        }
+    } else {
+        puts("Well, that went badly.");
+    }
+    }
+  
 }
 
 int Client::receiveEvent(Event event){
@@ -98,6 +145,7 @@ bool KeyPressListener::eventFilter(QObject *obj, QEvent *event){
 }
 
 void executeEvent(int pos, QString string){
+    cursor_locked=1;
     QTextCursor oldcursor = textEdit->textCursor();
     QTextCursor tempcursor = textEdit->textCursor();
     tempcursor.setPosition(pos,QTextCursor::MoveAnchor);
@@ -129,6 +177,7 @@ void executeEvent(int pos, QString string){
     //------------------------------------------------------
 
     saveData();
+    cursor_locked=0;
 }
 
 void saveData(){
@@ -160,11 +209,15 @@ int main(int argv, char **args){
 
     filename=QString("test.txt");
     QApplication app(argv,args);
-    client.start("127.0.0.1", 8888);
+    if (argv<=1) {
+        client.start("127.0.0.1", 8888);
+    } else {
+        client.start(args[1], 8888);
+    }
     databuf=QString();
     textEdit = new QTextEdit();
     KeyPressListener *keylisten = new KeyPressListener();
-    client.connect_signal(keylisten);
+    client.connect_signal(keylisten,textEdit);
     textEdit->installEventFilter(keylisten);
     textEdit->show();
     

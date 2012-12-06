@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
+#include <queue>
 #include "../common.h"
 
 class KeyPressListener: public QObject{
@@ -30,7 +31,7 @@ public:
   ~Server();
   void connect_signal(void *ref);
   int receiveEvent(Event event);
-  void broadcastEvent(Event event);
+  void broadcastAction(char *string);
 public slots:
   void acceptConnection();
   void startRead();
