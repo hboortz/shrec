@@ -1,7 +1,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#define MAX_MSG_SIZE 1016
+#define MAX_MSG_SIZE 1024
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,11 +16,10 @@ using namespace std;
 //TODOS
 //  Fix mallocated sizes with MAX_MSG_SIZE
 //   Make these standard across client and server
-//  Implement all 5 types of events (except maybe cursor move)
-//  Use selections properly
+//  Implement ADD_STRING and maybe CURSOR_MOVE
 //  Copy/paste
 //  Figure out a good method of synchronizing cursor positions 
-//  Make initial send work with larger strings
+//  Make filename match the date & time of the first connection
 
 
 // Used to record key events
@@ -44,6 +43,5 @@ void addAction(Action *action, char* string);
 void popAction(Action *action, char* string);
 void popMetadata(char **inputString, Action *action, int *size, char **msg);
 void addMetadata(const Action action, char* string);
-
 
 #endif

@@ -171,6 +171,9 @@ bool KeyPressListener::eventFilter(QObject *obj, QEvent *event){
             QTextCursor cursor = textEdit->textCursor();
             int position = cursor.position();
             int anchor = cursor.anchor();
+            if((nvk==65288 && position==0)||(nvk==65535 && position==static_cast<int>(strlen(textEdit->toPlainText().toLocal8Bit())))) {
+                return true; //bksp at pos 0 or del at pos max doesn't do anything
+            }
             if(position==anchor) {
                 if(nvk==65288){ //bksp
                     sprintf(msg,"%i|%i",position-1,position);

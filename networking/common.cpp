@@ -15,20 +15,17 @@ char *eventToString(Event event)
 }
 
 Event stringToEvent(char *string){
-    int i = 0;
-    int j;
-    //changed values because buffer overflow on rapid keystrokes;
-    //fix error and change back eventually
-    char *pos = (char*)malloc(sizeof(char)*MAX_MSG_SIZE*2/3); //used to be 14
-    char *nvk = (char*)malloc(sizeof(char)*MAX_MSG_SIZE/3); //used to be 7
-    while(string[i] != '|'){
-        i++;
-    }
-    strncpy(pos,string,i);
-    pos[i]='\0';
-    j=strlen(string)-i-1;
-    strncpy(nvk,&string[i+1],j);
-    nvk[j]='\0';
+    int size1 = strchr(string,'|')-string;
+    int size2;
+
+    char *pos = (char*)malloc(sizeof(char)*10);
+    char *nvk = (char*)malloc(sizeof(char)*7);
+
+    strncpy(pos,string,size1);
+    pos[size1]='\0';
+    size2=strlen(string)-size1-1;
+    strncpy(nvk,string+size1+1,size2);
+    nvk[size2]='\0';
     Event event = {
         .nvk = atoi(nvk),
         .pos = atoi(pos)
@@ -40,6 +37,7 @@ Event stringToEvent(char *string){
 //string format: ####|##|[msg]
 // or: [4-char length]|[2-char action]|[msg]
 void addMetadata(const Action action, char* string){
+    printf("Message length: %i\n",static_cast<int>(strlen(string)));
     char *newstring = (char*)malloc(sizeof(char)*MAX_MSG_SIZE);
     sprintf(newstring,"%.4i|%.2i|%s",static_cast<int>(strlen(string)),action,string);
     strcpy(string, newstring);
