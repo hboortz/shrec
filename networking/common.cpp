@@ -2,8 +2,8 @@
 
 char *eventToString(Event event)
 {
-    char *pos = (char*)malloc(sizeof(char)*MAX_MSG_SIZE*2/3);
-    char *nvk = (char*)malloc(sizeof(char)*MAX_MSG_SIZE/3);
+    char *pos = (char*)malloc(sizeof(char)*1000);
+    char *nvk = (char*)malloc(sizeof(char)*6);
     char *string = (char*)malloc(sizeof(char)*MAX_MSG_SIZE);
     sprintf(pos,"%i",event.pos);
     sprintf(nvk,"%i",event.nvk);

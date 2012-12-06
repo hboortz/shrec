@@ -13,6 +13,15 @@
 #include <deque>
 using namespace std;
 
+//TODOS
+//  Fix mallocated sizes with MAX_MSG_SIZE
+//   Make these standard across client and server
+//  Implement all 5 types of events (except maybe cursor move)
+//  Use selections properly
+//  Copy/paste
+//  Figure out a good method of synchronizing cursor positions
+
+
 // Used to record key events
 typedef struct {
     int nvk; //key identifier

@@ -37,6 +37,7 @@ public:
   void start(QString address, quint16 port);
   void connect_signal(void *ref1, void *ref2);
   int receiveEvent(Event event);
+  void initialRead(char *msg);
 public slots:
   void init();
   void startRead();

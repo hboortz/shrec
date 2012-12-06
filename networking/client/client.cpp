@@ -55,6 +55,7 @@ void Client::init()
   //client.write("Hello, world", 13);
     connect(&client, SIGNAL(readyRead()), this, SLOT(startRead()));
     puts("connected");
+    textEdit->setPlainText("");
 }
 
 void Client::startRead()
@@ -88,6 +89,15 @@ void Client::startRead()
             case KEY_EVENT:
                 receiveEvent(stringToEvent(msg));
                 break;
+            case ADD_STRING:
+                break;
+            case REMOVE_STRING:
+                break;
+            case INITIAL_SEND:
+                initialRead(msg);
+                break;
+            case CURSOR_MOVE:
+                break;
             default:
                 puts("We don't take your kind here.");
                 break;
@@ -96,8 +106,15 @@ void Client::startRead()
         puts("Well, that went badly.");
     }
     }
-  
 }
+
+void Client::initialRead(char *msg){
+    char *newtext = (char*)malloc(strlen(msg)+strlen(textEdit->toPlainText().toLocal8Bit().data()));
+    strcpy(newtext,textEdit->toPlainText().toLocal8Bit().data());
+    strcat(newtext,msg);
+    textEdit->setPlainText(newtext);
+}
+
 
 int Client::receiveEvent(Event event){
     //called when the app receives an event from the server

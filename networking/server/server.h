@@ -32,6 +32,7 @@ public:
   void connect_signal(void *ref);
   int receiveEvent(Event event);
   void broadcastAction(char *string);
+  void initialWrite(QTcpSocket *client);
 public slots:
   void acceptConnection();
   void startRead();

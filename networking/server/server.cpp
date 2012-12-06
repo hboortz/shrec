@@ -40,7 +40,24 @@ void Server::acceptConnection()
   puts("connected");
   connect(clients[numclients], SIGNAL(readyRead()),
     this, SLOT(startRead()));
+  initialWrite(clients[numclients]);
   numclients+=1;
+}
+
+void Server::initialWrite(QTcpSocket *client)
+{
+    char *text = textEdit->toPlainText().toLocal8Bit().data();
+    char *temp = (char*)malloc(sizeof(char)*1024);
+    int length = strlen(text);
+    Action action = INITIAL_SEND;
+    while(length>0){
+        strncpy(temp,text,1015);
+        temp[1015] = '\0';
+        addMetadata(action,temp);
+        client->write(temp);
+        length-=1015;
+        text+=1015;
+    }
 }
 
 void Server::startRead()
@@ -75,6 +92,16 @@ void Server::startRead()
             case KEY_EVENT:
                 receiveEvent(stringToEvent(msg));
                 break;
+            case ADD_STRING:
+                break;
+            case REMOVE_STRING:
+                break;
+            case INITIAL_SEND:
+                puts("That's weird. Clients should never send that action.");
+                exit(-1);
+                break;
+            case CURSOR_MOVE:
+                break;
             default:
                 puts("We don't take your kind here.");
                 break;
@@ -86,9 +113,6 @@ void Server::startRead()
         puts("Well, that went badly.");
     }
     }
-
-    //make 2 readQueue s
-    //make a readQueue execution loop
 
     //receiveEvent(stringToEvent(buffer));
     //cout << buffer << endl;
