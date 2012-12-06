@@ -23,7 +23,7 @@ Q_OBJECT
 public:
   bool eventFilter(QObject *obj, QEvent *event);
 signals:
-  void signalWrite(Event event);
+  void signalWrite(Action action, char *msg);
 };
 
 
@@ -41,7 +41,7 @@ public:
 public slots:
   void init();
   void startRead();
-  void writeData(Event event);
+  void writeData(Action action, char *msg);
   void cursorPositionChanged();
   void saveData();
 private:
@@ -52,5 +52,6 @@ private:
 void executeEvent(int pos, QString string);
 int receiveEvent(int pos, int event);
 int sendEvent(int pos, int event);
+void removeString(char *msg);
 
 #endif

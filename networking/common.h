@@ -1,7 +1,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#define MAX_MSG_SIZE 210
+#define MAX_MSG_SIZE 1016
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,7 +19,8 @@ using namespace std;
 //  Implement all 5 types of events (except maybe cursor move)
 //  Use selections properly
 //  Copy/paste
-//  Figure out a good method of synchronizing cursor positions
+//  Figure out a good method of synchronizing cursor positions 
+//  Make initial send work with larger strings
 
 
 // Used to record key events

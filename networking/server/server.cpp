@@ -57,10 +57,15 @@ void Server::initialWrite(QTcpSocket *client)
     char *temp = (char*)malloc(sizeof(char)*1024);
     int length = strlen(text);
     Action action = INITIAL_SEND;
+    puts("test");
     while(length>0){
         strncpy(temp,text,1015);
         temp[1015] = '\0';
+        puts("test");
+        printf("Part of the initial write: %s\n",temp);
         addMetadata(action,temp);
+        printf("Part of the initial write: %s\n",temp);
+        puts("test");
         client->write(temp);
         length-=1015;
         text+=1015;
@@ -85,15 +90,14 @@ void Server::startRead()
     while(bytesPushed<bytesAvail){
     *size=0;
     popMetadata(&buffer,action,size,&msg);
-    printf("Msg: %s\n",msg);
     bytesPushed+=(*size+8);
     if(bytesPushed<=bytesAvail){
         
         printf("Bytes pushed: %i, Bytes available: %i\n",bytesPushed,bytesAvail);
         if(bytesPushed<bytesAvail){
-            printf("Msg: %s\nData remaining: %s\n",msg,buffer);
+            printf("Msg: %s\nData remaining: %s\n\n",msg,buffer);
         } else {
-            printf("Msg: %s\n",msg);
+            printf("Msg: %s\n\n",msg);
         }
         switch(*action) {
             case KEY_EVENT:
@@ -102,6 +106,7 @@ void Server::startRead()
             case ADD_STRING:
                 break;
             case REMOVE_STRING:
+                removeString(msg);
                 break;
             case INITIAL_SEND:
                 puts("That's weird. Clients should never send that action.");
@@ -147,6 +152,8 @@ int Server::receiveEvent(Event event){
         text = QString("bksp");
     } else if (event.nvk==65535) { //delete
         text = QString("del");
+    } else if (event.nvk==65289) { //tab
+        text = QString("    ");
     } else {
         text = QString("");
     }
@@ -181,6 +188,27 @@ void executeEvent(int pos, QString string){
 }
 
 //-----------------------------------------------------------------
+
+
+void removeString(char *msg) {
+    char *posstring = (char*)malloc(sizeof(char)*10);
+    char *anchorstring = (char*)malloc(sizeof(char)*10);
+    int pos;
+    int anchor;
+    int possize = strchr(msg,'|') - msg;
+    strncpy(posstring,msg,possize);
+    strcpy(anchorstring,msg+possize+1);
+    pos=atoi(posstring);
+    anchor=atoi(anchorstring);
+
+    QTextCursor oldcursor = textEdit->textCursor();
+    QTextCursor tempcursor = textEdit->textCursor();
+    tempcursor.setPosition(anchor,QTextCursor::MoveAnchor);
+    tempcursor.setPosition(pos,QTextCursor::KeepAnchor);
+    textEdit->setTextCursor(tempcursor);
+    tempcursor.deleteChar();
+    textEdit->setTextCursor(oldcursor);
+}
 
 //NOTE: This code has the potential to intercept possibly useful events!
 //  Change if necessary.

@@ -29,19 +29,18 @@ void Client::cursorPositionChanged() {
     }
 
 void Client::connect_signal(void *ref1, void *ref2){
-    connect((KeyPressListener*)ref1, SIGNAL(signalWrite(Event)),this, SLOT(writeData(Event)));
+    connect((KeyPressListener*)ref1, SIGNAL(signalWrite(Action,char*)),this, SLOT(writeData(Action,char*)));
     connect((QTextEdit*)ref2, SIGNAL(cursorPositionChanged()), this, SLOT(cursorPositionChanged()));
 }
 
-void Client::writeData(Event event)
+void Client::writeData(Action action, char *msg)
 {
     puts("writing");
-    char *eventString = (char*)malloc(sizeof(char)*1024); //change size!
-    strcpy(eventString,eventToString(event));
-    Action action = KEY_EVENT;
-    addMetadata(action,eventString);
-    printf("%s\n",eventString);
-    client.write(eventString);
+    char *stringToWrite = (char*)malloc(sizeof(char)*1024); //change size!
+    strcpy(stringToWrite,msg);
+    addMetadata(action,stringToWrite);
+    printf("Sending to server: %s\n",stringToWrite);
+    client.write(stringToWrite);
 }
 
 void Client::start(QString address, quint16 port)
@@ -74,15 +73,14 @@ void Client::startRead()
     while(bytesPushed<bytesAvail){
     *size=0;
     popMetadata(&buffer,action,size,&msg);
-    printf("Msg: %s\n",msg);
     bytesPushed+=(*size+8);
     if(bytesPushed<=bytesAvail){
         
         printf("Bytes pushed: %i, Bytes available: %i\n",bytesPushed,bytesAvail);
         if(bytesPushed<bytesAvail){
-            printf("Msg: %s\nData remaining: %s\n",msg,buffer);
+            printf("Msg: %s\nData remaining: %s\n\n",msg,buffer);
         } else {
-            printf("Msg: %s\n",msg);
+            printf("Msg: %s\n\n",msg);
         }
         switch(*action) {
             case KEY_EVENT:
@@ -91,6 +89,7 @@ void Client::startRead()
             case ADD_STRING:
                 break;
             case REMOVE_STRING:
+                removeString(msg);
                 break;
             case INITIAL_SEND:
                 initialRead(msg);
@@ -111,6 +110,7 @@ void Client::initialRead(char *msg){
     char *newtext = (char*)malloc(strlen(msg)+strlen(textEdit->toPlainText().toLocal8Bit().data()));
     strcpy(newtext,textEdit->toPlainText().toLocal8Bit().data());
     strcat(newtext,msg);
+    printf("Part of the initial read: %s\n",msg);
     textEdit->setPlainText(newtext);
 }
 
@@ -127,6 +127,8 @@ int Client::receiveEvent(Event event){
         text = QString("bksp");
     } else if (event.nvk==65535) { //delete
         text = QString("del");
+    } else if (event.nvk==65289) { //tab
+        text = QString("    ");
     } else {
         text = QString("");
     }
@@ -156,22 +158,69 @@ bool KeyPressListener::eventFilter(QObject *obj, QEvent *event){
         int nvk = keyEvent->nativeVirtualKey(); //extract NVK (useful because distinct upper/lower values)
         int pos = textEdit->textCursor().position();
         qDebug("NVK: %d",nvk);
-        Event event = {
-            .nvk = nvk,
-            .pos = pos
-        };
-        emit signalWrite(event);
-        if (nvk>=65361 && nvk<=65364){ //TODO: Review this line of code
-            return false;
-        } else {
-            return true;
+        if ((nvk>=32 && nvk<=126)||(nvk==65289)||(nvk==65293)) {
+            Event textevent = {
+                .nvk = nvk,
+                .pos = pos
+            };
+            Action action = KEY_EVENT;
+            emit signalWrite(action, eventToString(textevent));
+        } else if ((nvk==65288)||(nvk==65535)) { //backspace or delete
+            Action action = REMOVE_STRING;
+            char *msg = (char*)malloc(sizeof(char)*20);
+            QTextCursor cursor = textEdit->textCursor();
+            int position = cursor.position();
+            int anchor = cursor.anchor();
+            if(position==anchor) {
+                if(nvk==65288){ //bksp
+                    sprintf(msg,"%i|%i",position-1,position);
+                } else {
+                    sprintf(msg,"%i|%i",position,position+1);
+                }
+            } else if(position<anchor) {
+                sprintf(msg,"%i|%i",position,anchor);
+            } else {
+                sprintf(msg,"%i|%i",anchor,position);
+            }
+            emit signalWrite(action, msg);
+        } else if ((nvk>=65360)&&(nvk<=65367)) {
+            return false; //navigation
         }
+        return true;
     } else {
         return QObject::eventFilter(obj, event);
     }
 }
 
+void removeString(char *msg) {
+    char *posstring = (char*)malloc(sizeof(char)*10);
+    char *anchorstring = (char*)malloc(sizeof(char)*10);
+    int pos;
+    int anchor;
+    int possize = strchr(msg,'|') - msg;
+    strncpy(posstring,msg,possize);
+    strcpy(anchorstring,msg+possize+1);
+    pos=atoi(posstring);
+    anchor=atoi(anchorstring);
+
+    if(cursor_locked){
+        exit(-1); //I don't think that this thread should ever spawn race conditions, but you never know.
+    }
+    cursor_locked=1;
+    QTextCursor oldcursor = textEdit->textCursor();
+    QTextCursor tempcursor = textEdit->textCursor();
+    tempcursor.setPosition(anchor,QTextCursor::MoveAnchor);
+    tempcursor.setPosition(pos,QTextCursor::KeepAnchor);
+    textEdit->setTextCursor(tempcursor);
+    tempcursor.deleteChar();
+    textEdit->setTextCursor(oldcursor);
+    cursor_locked=0;
+}
+
 void executeEvent(int pos, QString string){
+    if(cursor_locked){
+        exit(-1); //I don't think that this thread should ever spawn race conditions, but you never know.
+    }
     cursor_locked=1;
     QTextCursor oldcursor = textEdit->textCursor();
     QTextCursor tempcursor = textEdit->textCursor();
