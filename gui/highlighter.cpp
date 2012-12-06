@@ -14,12 +14,12 @@
  {
      HighlightingRule rule;
 
-     keywordFormat.setForeground(Qt::darkBlue);
+     keywordFormat.setForeground(Qt::blue);
      keywordFormat.setFontWeight(QFont::Bold);
      QStringList keywordPatterns;
-     keywordPatterns << "\\bchar\\b" << "\\bclass\\b" << "\\bconst\\b"
+     keywordPatterns << "\\bclass\\b" << "\\bconst\\b"
                      << "\\bdouble\\b" << "\\benum\\b" << "\\bexplicit\\b"
-                     << "\\bfriend\\b" << "\\binline\\b" << "\\bint\\b"
+                     << "\\bfriend\\b" << "\\binline\\b"
                      << "\\blong\\b" << "\\bnamespace\\b" << "\\boperator\\b"
                      << "\\bprivate\\b" << "\\bprotected\\b" << "\\bpublic\\b"
                      << "\\bshort\\b" << "\\bsignals\\b" << "\\bsigned\\b"
@@ -32,6 +32,11 @@
          rule.format = keywordFormat;
          highlightingRules.append(rule);
      }
+
+     dataType.setForeground(Qt::cyan);
+     rule.pattern = QRegExp("\\bchar\\b|\\bint\\b");
+     rule.format = dataType;
+     highlightingRules.append(rule);
 
      classFormat.setFontWeight(QFont::Bold);
      classFormat.setForeground(Qt::darkMagenta);
