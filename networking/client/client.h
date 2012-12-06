@@ -21,9 +21,9 @@
 class KeyPressListener: public QObject{
 Q_OBJECT
 public:
-    bool eventFilter(QObject *obj, QEvent *event);
+  bool eventFilter(QObject *obj, QEvent *event);
 signals:
-    void signalWrite(Event event);
+  void signalWrite(Event event);
 };
 
 
@@ -43,6 +43,7 @@ public slots:
   void startRead();
   void writeData(Event event);
   void cursorPositionChanged();
+  void saveData();
 private:
   QTcpSocket client;
 };
@@ -51,6 +52,5 @@ private:
 void executeEvent(int pos, QString string);
 int receiveEvent(int pos, int event);
 int sendEvent(int pos, int event);
-void saveData();
 
 #endif

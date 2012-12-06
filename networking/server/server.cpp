@@ -4,17 +4,20 @@ using namespace std;
 static QString databuf;
 QTextEdit *textEdit;
 QString filename;
-QTcpSocket *clients[5];
+QTcpSocket *clients[10];
 int numclients;
 
 //----------------------------------------------------------------
 
 Server::Server(QObject* parent): QObject(parent)
 {
-  connect(&server, SIGNAL(newConnection()),
-    this, SLOT(acceptConnection()));
+    connect(&server, SIGNAL(newConnection()),this, SLOT(acceptConnection()));
 
-  server.listen(QHostAddress::Any, 8888);
+    server.listen(QHostAddress::Any, 8888);
+
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(saveData()));
+    timer->start(15000);
 }
 
 void Server::connect_signal(void *ref){
@@ -23,7 +26,7 @@ void Server::connect_signal(void *ref){
 
 Server::~Server()
 {
-  server.close();
+    server.close();
 }
 
 void Server::writeData()
@@ -36,12 +39,16 @@ void Server::writeData()
 
 void Server::acceptConnection()
 {
-  clients[numclients] = server.nextPendingConnection();
-  puts("connected");
-  connect(clients[numclients], SIGNAL(readyRead()),
-    this, SLOT(startRead()));
-  initialWrite(clients[numclients]);
-  numclients+=1;
+    clients[numclients] = server.nextPendingConnection();
+    puts("connected");
+    connect(clients[numclients], SIGNAL(readyRead()), this, SLOT(startRead()));
+    connect(clients[numclients], SIGNAL(disconnected()), this, SLOT(clientDisconnect()));
+    initialWrite(clients[numclients]);
+    numclients+=1;
+}
+
+void Server::clientDisconnect() {
+    numclients--;
 }
 
 void Server::initialWrite(QTcpSocket *client)
@@ -148,6 +155,18 @@ int Server::receiveEvent(Event event){
     return(0);
 }
 
+void Server::saveData(){
+    puts("save");
+    QString contents = QString(textEdit->toPlainText());
+    FILE *file;
+    file = fopen(filename.toLocal8Bit().data(),"w+");
+    QFile qfile;
+    qfile.open(file,QIODevice::WriteOnly);
+    qfile.write(contents.toLocal8Bit().data());
+    qfile.close();
+    fclose(file);
+}
+
 void executeEvent(int pos, QString string){
     QTextCursor cursor = textEdit->textCursor();
     cursor.setPosition(pos,QTextCursor::MoveAnchor);
@@ -159,44 +178,24 @@ void executeEvent(int pos, QString string){
     } else {
         textEdit->insertPlainText(string);
     }
-    saveData();
 }
 
 //-----------------------------------------------------------------
 
+//NOTE: This code has the potential to intercept possibly useful events!
+//  Change if necessary.
 bool KeyPressListener::eventFilter(QObject *obj, QEvent *event){
     //called when textEdit has an event
-    if (event->type() == QEvent::KeyPress) {
-        //emit signalWrite();
-        return true;
+    switch(event->type()){
+        case QEvent::UpdateRequest: return false;
+        case QEvent::Paint: return false;
+        default: return true;
     }
-    return false; //server cannot interact with code
-}
-
-
-
-void saveData(){
-    qDebug("save");
-    QString contents = QString(textEdit->toPlainText());
-    FILE *file;
-    file = fopen(filename.toLocal8Bit().data(),"w+");
-    QFile qfile;
-    qfile.open(file,QIODevice::WriteOnly);
-    qfile.write(contents.toLocal8Bit().data());
-    qfile.close();
-    fclose(file);
-}
-
-int sendEvent(int pos, int event){
-    //method to be used to send an event to the server
-    //returns 0 for no error
-    return(0);
 }
 
 int main(int argv, char **args){
     numclients=0;
     QApplication app(argv,args);
-    stringToEvent(const_cast<char *>("5345987652|1461"));
     filename=QString("test.txt");
     databuf=QString();
     textEdit = new QTextEdit();

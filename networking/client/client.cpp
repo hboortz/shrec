@@ -4,7 +4,6 @@
 QString databuf;
 QString filename;
 QTextEdit *textEdit;
-Client client;
 int cursor_locked = 0;
 
 
@@ -12,20 +11,22 @@ int cursor_locked = 0;
 
 Client::Client(QObject* parent): QObject(parent)
 {
-  connect(&client, SIGNAL(connected()),
-    this, SLOT(init()));
+    connect(&client, SIGNAL(connected()), this, SLOT(init()));
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(saveData()));
+    timer->start(15000);
 }
 
 Client::~Client()
 {
-  client.close();
+    client.close();
 }
 
 void Client::cursorPositionChanged() {
     if(!cursor_locked) {
         puts("Position changed.");
     }
-}
+    }
 
 void Client::connect_signal(void *ref1, void *ref2){
     connect((KeyPressListener*)ref1, SIGNAL(signalWrite(Event)),this, SLOT(writeData(Event)));
@@ -41,18 +42,16 @@ void Client::writeData(Event event)
     addMetadata(action,eventString);
     printf("%s\n",eventString);
     client.write(eventString);
-    //client.waitForBytesWritten();
 }
 
 void Client::start(QString address, quint16 port)
 {
-  QHostAddress addr(address);
-  client.connectToHost(addr, port);
+    QHostAddress addr(address);
+    client.connectToHost(addr, port);
 }
 
 void Client::init()
 {
-  //client.write("Hello, world", 13);
     connect(&client, SIGNAL(readyRead()), this, SLOT(startRead()));
     puts("connected");
     textEdit->setPlainText("");
@@ -135,6 +134,18 @@ int Client::receiveEvent(Event event){
     return(0);
 }
 
+void Client::saveData(){
+    puts("save");
+    QString contents = QString(textEdit->toPlainText());
+    FILE *file;
+    file = fopen(filename.toLocal8Bit().data(),"w+");
+    QFile qfile;
+    qfile.open(file,QIODevice::WriteOnly);
+    qfile.write(contents.toLocal8Bit().data());
+    qfile.close();
+    fclose(file);
+}
+
 //---------------------------------------------------------------
 
 bool KeyPressListener::eventFilter(QObject *obj, QEvent *event){
@@ -142,7 +153,6 @@ bool KeyPressListener::eventFilter(QObject *obj, QEvent *event){
     //QTextEdit *thisTextEdit = (QTextEdit*)obj;
     if (event->type() == QEvent::KeyPress) { //handle key press events
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event); //get the event object
-        int key = keyEvent->key(); //extract key code (no upper/lower)
         int nvk = keyEvent->nativeVirtualKey(); //extract NVK (useful because distinct upper/lower values)
         int pos = textEdit->textCursor().position();
         qDebug("NVK: %d",nvk);
@@ -151,7 +161,7 @@ bool KeyPressListener::eventFilter(QObject *obj, QEvent *event){
             .pos = pos
         };
         emit signalWrite(event);
-        if (nvk>=65361 && nvk<=65364){
+        if (nvk>=65361 && nvk<=65364){ //TODO: Review this line of code
             return false;
         } else {
             return true;
@@ -193,39 +203,13 @@ void executeEvent(int pos, QString string){
     textEdit->setExtraSelections( extras );
     //------------------------------------------------------
 
-    saveData();
     cursor_locked=0;
 }
 
-void saveData(){
-    qDebug("save");
-    QString contents = QString(textEdit->toPlainText());
-    FILE *file;
-    file = fopen(filename.toLocal8Bit().data(),"w+");
-    QFile qfile;
-    qfile.open(file,QIODevice::WriteOnly);
-    qfile.write(contents.toLocal8Bit().data());
-    qfile.close();
-    fclose(file);
-}
-
-int sendEvent(int pos, int event){
-    //method to be used to send an event to the server
-    //returns 0 for no error
-    return(0);
-}
-
 int main(int argv, char **args){
-    Event event = {
-        .nvk = 5,
-        .pos = 23
-    };
-    //event->nvk=5;
-    //event->pos=23;
-    eventToString(event);
-
     filename=QString("test.txt");
     QApplication app(argv,args);
+    Client client;
     if (argv<=1) {
         client.start("127.0.0.1", 8888);
     } else {

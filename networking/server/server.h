@@ -37,6 +37,8 @@ public slots:
   void acceptConnection();
   void startRead();
   void writeData();
+  void saveData();
+  void clientDisconnect();
 private:
   QTcpServer server;
   QTcpSocket* client;
@@ -44,6 +46,5 @@ private:
 
 void executeEvent(int pos, QString string);
 int sendEvent(int pos, int event);
-void saveData();
 
 #endif
