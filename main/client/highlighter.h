@@ -14,6 +14,7 @@
 
  #include <QHash>
  #include <QTextCharFormat>
+ #include <QObject>
 
  class QTextDocument;
 

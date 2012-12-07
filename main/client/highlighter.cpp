@@ -20,9 +20,9 @@
      keywordPatterns << "\\bclass\\b" << "\\bconst\\b"
                      << "\\bdouble\\b" << "\\benum\\b" << "\\bexplicit\\b"
                      << "\\bfriend\\b" << "\\binline\\b"
-                     << "\\blong\\b" << "\\bnamespace\\b" << "\\boperator\\b"
+                     << "\\bnamespace\\b" << "\\boperator\\b"
                      << "\\bprivate\\b" << "\\bprotected\\b" << "\\bpublic\\b"
-                     << "\\bshort\\b" << "\\bsignals\\b" << "\\bsigned\\b"
+                     << "\\bsignals\\b" << "\\bsigned\\b"
                      << "\\bslots\\b" << "\\bstatic\\b" << "\\bstruct\\b"
                      << "\\btemplate\\b" << "\\btypedef\\b" << "\\btypename\\b"
                      << "\\bunion\\b" << "\\bunsigned\\b" << "\\bvirtual\\b"
@@ -33,8 +33,10 @@
          highlightingRules.append(rule);
      }
 
+
+
      dataType.setForeground(Qt::cyan);
-     rule.pattern = QRegExp("\\bchar\\b|\\bint\\b");
+     rule.pattern = QRegExp("\\bchar\\b|\\bint\\b|\\bshort\\b|\\blong\\b");
      rule.format = dataType;
      highlightingRules.append(rule);
 

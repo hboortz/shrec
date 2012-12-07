@@ -1,9 +1,12 @@
 #include "client.h"
 #include <QtGui/QApplication>
-
+#include <QtGui>
+#include "mainwindow.h"
+#include "highlighter.h"
+#include <algorithm>
 QString databuf;
 QString filename;
-QTextEdit *textEdit;
+QTextEdit *editor;
 int cursor_locked = 0;
 
 
@@ -31,6 +34,7 @@ void Client::cursorPositionChanged() {
 void Client::connect_signal(void *ref1, void *ref2){
     connect((KeyPressListener*)ref1, SIGNAL(signalWrite(Action,char*)),this, SLOT(writeData(Action,char*)));
     connect((QTextEdit*)ref2, SIGNAL(cursorPositionChanged()), this, SLOT(cursorPositionChanged()));
+    puts("test");
 }
 
 void Client::writeData(Action action, char *msg)
@@ -53,7 +57,7 @@ void Client::init()
 {
     connect(&client, SIGNAL(readyRead()), this, SLOT(startRead()));
     puts("connected");
-    textEdit->setPlainText("");
+    editor->setPlainText("");
 }
 
 void Client::startRead()
@@ -75,7 +79,7 @@ void Client::startRead()
     popMetadata(&buffer,action,size,&msg);
     bytesPushed+=(*size+8);
     if(bytesPushed<=bytesAvail){
-        
+
         printf("Bytes pushed: %i, Bytes available: %i\n",bytesPushed,bytesAvail);
         if(bytesPushed<bytesAvail){
             printf("Msg: %s\nData remaining: %s\n\n",msg,buffer);
@@ -107,11 +111,11 @@ void Client::startRead()
 }
 
 void Client::initialRead(char *msg){
-    char *newtext = (char*)malloc(strlen(msg)+strlen(textEdit->toPlainText().toLocal8Bit().data()));
-    strcpy(newtext,textEdit->toPlainText().toLocal8Bit().data());
+    char *newtext = (char*)malloc(strlen(msg)+strlen(editor->toPlainText().toLocal8Bit().data()));
+    strcpy(newtext,editor->toPlainText().toLocal8Bit().data());
     strcat(newtext,msg);
     printf("Part of the initial read: %s\n",msg);
-    textEdit->setPlainText(newtext);
+    editor->setPlainText(newtext);
 }
 
 
@@ -138,7 +142,7 @@ int Client::receiveEvent(Event event){
 
 void Client::saveData(){
     puts("save");
-    QString contents = QString(textEdit->toPlainText());
+    QString contents = QString(editor->toPlainText());
     FILE *file;
     file = fopen(filename.toLocal8Bit().data(),"w+");
     QFile qfile;
@@ -151,12 +155,12 @@ void Client::saveData(){
 //---------------------------------------------------------------
 
 bool KeyPressListener::eventFilter(QObject *obj, QEvent *event){
-    //called when textEdit has an event
+    //called when editor has an event
     //QTextEdit *thisTextEdit = (QTextEdit*)obj;
     if (event->type() == QEvent::KeyPress) { //handle key press events
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event); //get the event object
         int nvk = keyEvent->nativeVirtualKey(); //extract NVK (useful because distinct upper/lower values)
-        int pos = textEdit->textCursor().position();
+        int pos = editor->textCursor().position();
         qDebug("NVK: %d",nvk);
         if ((nvk>=32 && nvk<=126)||(nvk==65289)||(nvk==65293)) {
             Event textevent = {
@@ -168,10 +172,10 @@ bool KeyPressListener::eventFilter(QObject *obj, QEvent *event){
         } else if ((nvk==65288)||(nvk==65535)) { //backspace or delete
             Action action = REMOVE_STRING;
             char *msg = (char*)malloc(sizeof(char)*20);
-            QTextCursor cursor = textEdit->textCursor();
+            QTextCursor cursor = editor->textCursor();
             int position = cursor.position();
             int anchor = cursor.anchor();
-            if((nvk==65288 && position==0)||(nvk==65535 && position==static_cast<int>(strlen(textEdit->toPlainText().toLocal8Bit())))) {
+            if((nvk==65288 && position==0)||(nvk==65535 && position==static_cast<int>(strlen(editor->toPlainText().toLocal8Bit())))) {
                 return true; //bksp at pos 0 or del at pos max doesn't do anything
             }
             if(position==anchor) {
@@ -210,13 +214,13 @@ void removeString(char *msg) {
         exit(-1); //I don't think that this thread should ever spawn race conditions, but you never know.
     }
     cursor_locked=1;
-    QTextCursor oldcursor = textEdit->textCursor();
-    QTextCursor tempcursor = textEdit->textCursor();
+    QTextCursor oldcursor = editor->textCursor();
+    QTextCursor tempcursor = editor->textCursor();
     tempcursor.setPosition(anchor,QTextCursor::MoveAnchor);
     tempcursor.setPosition(pos,QTextCursor::KeepAnchor);
-    textEdit->setTextCursor(tempcursor);
+    editor->setTextCursor(tempcursor);
     tempcursor.deleteChar();
-    textEdit->setTextCursor(oldcursor);
+    editor->setTextCursor(oldcursor);
     cursor_locked=0;
 }
 
@@ -225,26 +229,26 @@ void executeEvent(int pos, QString string){
         exit(-1); //I don't think that this thread should ever spawn race conditions, but you never know.
     }
     cursor_locked=1;
-    QTextCursor oldcursor = textEdit->textCursor();
-    QTextCursor tempcursor = textEdit->textCursor();
+    QTextCursor oldcursor = editor->textCursor();
+    QTextCursor tempcursor = editor->textCursor();
     tempcursor.setPosition(pos,QTextCursor::MoveAnchor);
-    textEdit->setTextCursor(tempcursor);
+    editor->setTextCursor(tempcursor);
     if (string == "bksp") {
         tempcursor.deletePreviousChar();
     } else if (string == "del") {
         tempcursor.deleteChar();
     } else {
-        textEdit->insertPlainText(string);
+        editor->insertPlainText(string);
     }
-    textEdit->setTextCursor(oldcursor);
+    editor->setTextCursor(oldcursor);
 
     //Experimental block of code concerning text highlighting
     //----------------------------------------------------
     QTextEdit::ExtraSelection highlight;
-    highlight.cursor = textEdit->textCursor();
+    highlight.cursor = editor->textCursor();
     highlight.cursor.setPosition(pos,QTextCursor::MoveAnchor);
     highlight.cursor.setPosition(pos+1,QTextCursor::KeepAnchor);
-    highlight.format = textEdit->currentCharFormat();
+    highlight.format = editor->currentCharFormat();
     if(pos%2==0){
         highlight.format.setBackground(Qt::green);
     }else{
@@ -252,7 +256,7 @@ void executeEvent(int pos, QString string){
     }
     QList<QTextEdit::ExtraSelection> extras;
     extras << highlight;
-    textEdit->setExtraSelections( extras );
+    editor->setExtraSelections( extras );
     //------------------------------------------------------
 
     cursor_locked=0;
@@ -268,11 +272,17 @@ int main(int argv, char **args){
         client.start(args[1], 8888);
     }
     databuf=QString();
-    textEdit = new QTextEdit();
+    editor = new QTextEdit();
+    MainWindow window;
+
+    editor = window.editor;
+    //printf("Editor: %p, window.editor: %p\n",editor,(window.editor));
     KeyPressListener *keylisten = new KeyPressListener();
-    client.connect_signal(keylisten,textEdit);
-    textEdit->installEventFilter(keylisten);
-    textEdit->show();
-    
+    client.connect_signal(keylisten,editor);
+
+    editor->installEventFilter(keylisten);
+    window.show();
+    //textEdit->show();
+
     return app.exec();
 }

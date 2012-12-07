@@ -23,6 +23,7 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow();
+    QTextEdit *editor;
 
 protected:
     void contextMenuEvent(QContextMenuEvent *event);
@@ -43,7 +44,7 @@ private:
     void createActions();
     void createMenus();
     void setupEditor();
-    QTextEdit *editor;
+
     Highlighter *highlighter;
     QMenu *fileMenu;
     QMenu *editMenu;

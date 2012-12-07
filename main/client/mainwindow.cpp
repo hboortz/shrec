@@ -9,24 +9,25 @@
 
 #include "mainwindow.h"
 
+
+
 MainWindow::MainWindow()
 {
-
-    QTextEdit *textEdit = new QTextEdit;
+    editor = new QTextEdit;
 
     QWidget *widget = new QWidget;
     setCentralWidget(widget);
 
     QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(textEdit);
+    layout->addWidget(editor);
     widget->setLayout(layout);
 
     createActions();
     createMenus();
     setupEditor();
 
-    QString message = tr("A context menu is available by right-clicking");
-    statusBar()->showMessage(message);
+    //QString message = tr("A context menu is available by right-clicking");
+    //statusBar()->showMessage(message);
 
     setWindowTitle(tr("Secret-Octo-Ninja"));
     setMinimumSize(160, 160);
@@ -40,14 +41,14 @@ void MainWindow::setupEditor()
     font.setFixedPitch(true);
     font.setPointSize(10);
 
-    editor = new QTextEdit;
+    //editor = new QTextEdit;
     editor->setFont(font);
 
     highlighter = new Highlighter(editor->document());
 
-    QFile file("mainwindow.h");
-    if (file.open(QFile::ReadOnly | QFile::Text))
-        editor->setPlainText(file.readAll());
+    //QFile file("mainwindow.h");
+    //if (file.open(QFile::ReadOnly | QFile::Text))
+    //    editor->setPlainText(file.readAll());
 }
 
 void MainWindow::contextMenuEvent(QContextMenuEvent *event)
