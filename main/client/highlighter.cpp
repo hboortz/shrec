@@ -17,27 +17,36 @@
      keywordFormat.setForeground(Qt::blue);
      keywordFormat.setFontWeight(QFont::Bold);
      QStringList keywordPatterns;
-     keywordPatterns << "\\bclass\\b" << "\\bconst\\b"
-                     << "\\bdouble\\b" << "\\benum\\b" << "\\bexplicit\\b"
+     keywordPatterns << "\\bclass\\b" << "\\benum\\b" << "\\bexplicit\\b"
                      << "\\bfriend\\b" << "\\binline\\b"
                      << "\\bnamespace\\b" << "\\boperator\\b"
-                     << "\\bprivate\\b" << "\\bprotected\\b" << "\\bpublic\\b"
-                     << "\\bsignals\\b" << "\\bsigned\\b"
-                     << "\\bslots\\b" << "\\bstatic\\b" << "\\bstruct\\b"
-                     << "\\btemplate\\b" << "\\btypedef\\b" << "\\btypename\\b"
-                     << "\\bunion\\b" << "\\bunsigned\\b" << "\\bvirtual\\b"
-                     << "\\bvoid\\b" << "\\bvolatile\\b";
+                     << "\\bsignals\\b" << "\\bslots\\b"
+                     << "\\btemplate\\b" << "\\btypename\\b"
+                     << "\\bvirtual\\b" << "\\bvolatile\\b";
      foreach (const QString &pattern, keywordPatterns) {
          rule.pattern = QRegExp(pattern);
          rule.format = keywordFormat;
          highlightingRules.append(rule);
      }
 
+     structs.setForeground(Qt::magenta);
+     rule.pattern = QRegExp("\\btypedef\\b|\\bunion\\b|\\bstruct\\b");
+     rule.format = structs;
+     highlightingRules.append(rule);
 
+     funcType.setForeground(Qt::yellow);
+     rule.pattern = QRegExp("\\bprivate\\b|\\bprotected\\b|\\bpublic\\b|\\bvoid\\b|\\bstatic\\b");
+     rule.format = funcType;
+     highlightingRules.append(rule);
 
      dataType.setForeground(Qt::cyan);
-     rule.pattern = QRegExp("\\bchar\\b|\\bint\\b|\\bshort\\b|\\blong\\b");
+     rule.pattern = QRegExp("\\bchar\\b|\\bint\\b|\\bshort\\b|\\blong\\b|\\bfloat\\b|\\bdouble\\b");
      rule.format = dataType;
+     highlightingRules.append(rule);
+
+     dataTypeModifier.setForeground(Qt::cyan);
+     rule.pattern = QRegExp("\\bconst\\b|\\bunsigned\\b|\\bsigned\\b");
+     rule.format = dataTypeModifier;
      highlightingRules.append(rule);
 
      classFormat.setFontWeight(QFont::Bold);
