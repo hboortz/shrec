@@ -1,9 +1,5 @@
 #include "client.h"
-#include <QtGui/QApplication>
-#include <QtGui>
-#include "mainwindow.h"
-#include "highlighter.h"
-#include <algorithm>
+
 QString databuf;
 QString filename;
 QTextEdit *editor;
@@ -32,7 +28,7 @@ void Client::cursorPositionChanged() {
     }
 
 void Client::connect_signal(void *ref1, void *ref2){
-    connect((KeyPressListener*)ref1, SIGNAL(signalWrite(Action,char*)),this, SLOT(writeData(Action,char*)));
+    connect((ClientEventFilter*)ref1, SIGNAL(signalWrite(Action,char*)),this, SLOT(writeData(Action,char*)));
     connect((QTextEdit*)ref2, SIGNAL(cursorPositionChanged()), this, SLOT(cursorPositionChanged()));
     puts("test");
 }
@@ -153,8 +149,8 @@ void Client::saveData(){
 }
 
 //---------------------------------------------------------------
-
-bool KeyPressListener::eventFilter(QObject *obj, QEvent *event){
+/*
+bool ClientEventFilter::eventFilter(QObject *obj, QEvent *event){
     //called when editor has an event
     //QTextEdit *thisTextEdit = (QTextEdit*)obj;
     if (event->type() == QEvent::KeyPress) { //handle key press events
@@ -197,7 +193,7 @@ bool KeyPressListener::eventFilter(QObject *obj, QEvent *event){
     } else {
         return QObject::eventFilter(obj, event);
     }
-}
+}*/
 
 void removeString(char *msg) {
     char *posstring = (char*)malloc(sizeof(char)*10);
@@ -244,7 +240,7 @@ void executeEvent(int pos, QString string){
 
     //Experimental block of code concerning text highlighting
     //----------------------------------------------------
-    QTextEdit::ExtraSelection highlight;
+    /*QTextEdit::ExtraSelection highlight;
     highlight.cursor = editor->textCursor();
     highlight.cursor.setPosition(pos,QTextCursor::MoveAnchor);
     highlight.cursor.setPosition(pos+1,QTextCursor::KeepAnchor);
@@ -256,7 +252,7 @@ void executeEvent(int pos, QString string){
     }
     QList<QTextEdit::ExtraSelection> extras;
     extras << highlight;
-    editor->setExtraSelections( extras );
+    editor->setExtraSelections( extras );*/
     //------------------------------------------------------
 
     cursor_locked=0;
@@ -277,10 +273,10 @@ int main(int argv, char **args){
 
     editor = window.editor;
     //printf("Editor: %p, window.editor: %p\n",editor,(window.editor));
-    KeyPressListener *keylisten = new KeyPressListener();
-    client.connect_signal(keylisten,editor);
+    ClientEventFilter *eventFilter = new ClientEventFilter(editor);
+    client.connect_signal(eventFilter,editor);
 
-    editor->installEventFilter(keylisten);
+    editor->installEventFilter(eventFilter);
     window.show();
     //textEdit->show();
 

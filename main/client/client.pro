@@ -8,6 +8,6 @@ DEPENDPATH += .
 INCLUDEPATH += .
 
 # Input
-HEADERS += client.h ../common.h
-SOURCES += client.cpp ../common.cpp
+HEADERS += client.h ../common.h highlighter.h mainwindow.h clienteventfilter.h
+SOURCES += client.cpp ../common.cpp highlighter.cpp mainwindow.cpp clienteventfilter.cpp
 QT += network

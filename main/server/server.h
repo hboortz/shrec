@@ -1,18 +1,6 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <QtGui/QApplication>
-#include <QtGui/QTextEdit>
-#include <QtGui/QKeyEvent>
-#include <QTcpServer>
-#include <QTcpSocket>
-#include <QtNetwork>
-#include <QObject>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <iostream>
-#include <queue>
 #include "../common.h"
 
 class KeyPressListener: public QObject{

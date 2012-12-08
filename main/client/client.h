@@ -1,31 +1,10 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include <QObject>
-#include <QtNetwork>
-#include <QString>
-#include <QTcpSocket>
-#include <QApplication>
-#include <QtGui/QApplication>
-#include <QTextEdit>
-#include <QKeyEvent>
-#include <QDebug>
-#include <QFile>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <QHostAddress>
 #include "../common.h"
-
-
-class KeyPressListener: public QObject{
-Q_OBJECT
-public:
-  bool eventFilter(QObject *obj, QEvent *event);
-signals:
-  void signalWrite(Action action, char *msg);
-};
-
+#include "clienteventfilter.h"
+#include "mainwindow.h"
+#include "highlighter.h"
 
 class Client: public QObject
 {
@@ -47,6 +26,14 @@ public slots:
 private:
   QTcpSocket client;
 };
+
+/*class ClientEventFilter : public QObject {
+Q_OBJECT
+public:
+  bool eventFilter(QObject *obj, QEvent *event);
+signals:
+  void signalWrite(Action action, char *msg);
+};*/
 
 
 void executeEvent(int pos, QString string);

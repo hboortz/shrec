@@ -3,14 +3,28 @@
 
 #define MAX_MSG_SIZE 1024
 
+//Standard library includes
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
 #include <list>
-#include <iostream>
-#include <queue>
-#include <deque>
+#include <algorithm>
+
+//QT includes
+#include <QTcpServer>
+#include <QTcpSocket>
+#include <QObject>
+#include <QtNetwork>
+#include <QString>
+#include <QApplication>
+#include <QTextEdit>
+#include <QKeyEvent>
+#include <QDebug>
+#include <QFile>
+#include <QHostAddress>
+#include <QtGui>
+
 using namespace std;
 
 //TODOS
@@ -20,7 +34,7 @@ using namespace std;
 //  Copy/paste
 //  Figure out a good method of synchronizing cursor positions 
 //  Make filename match the date & time of the first connection
-
+//  Fix the server event capture code so that it can actually resize.... @_@
 
 // Used to record key events
 typedef struct {
