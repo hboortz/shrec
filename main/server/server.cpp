@@ -13,7 +13,7 @@ Server::Server(QObject* parent): QObject(parent)
 {
     connect(&server, SIGNAL(newConnection()),this, SLOT(acceptConnection()));
 
-    server.listen(QHostAddress::Any, 8888);
+    server.listen(QHostAddress::Any, 80);
 
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(saveData()));
@@ -205,17 +205,12 @@ void insertString(char *msg) {
     strcpy(insertstring,msg+possize+1);
     pos=atoi(posstring);
 
-    if(cursor_locked){
-        exit(-1); //I don't think that this thread should ever spawn race conditions, but you never know.
-    }
-    cursor_locked=1;
-    QTextCursor oldcursor = editor->textCursor();
-    QTextCursor tempcursor = editor->textCursor();
+    QTextCursor oldcursor = textEdit->textCursor();
+    QTextCursor tempcursor = textEdit->textCursor();
     tempcursor.setPosition(pos,QTextCursor::MoveAnchor);
-    editor->setTextCursor(tempcursor);
-    editor->insertPlainText(insertString);
-    editor->setTextCursor(oldcursor);
-    cursor_locked=0;
+    textEdit->setTextCursor(tempcursor);
+    textEdit->insertPlainText(insertstring);
+    textEdit->setTextCursor(oldcursor);
 }
 
 void removeString(char *msg) {
