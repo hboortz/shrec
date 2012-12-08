@@ -14,7 +14,7 @@
  {
      HighlightingRule rule;
 
-     keywordFormat.setForeground(Qt::blue);
+     keywordFormat.setForeground(QColor(60,60,250));
      keywordFormat.setFontWeight(QFont::Bold);
      QStringList keywordPatterns;
      keywordPatterns << "\\bclass\\b" << "\\benum\\b" << "\\bexplicit\\b"
@@ -68,7 +68,7 @@
      highlightingRules.append(rule);
 
      functionFormat.setFontItalic(true);
-     functionFormat.setForeground(Qt::blue);
+     functionFormat.setForeground(QColor(60,60,250));
      rule.pattern = QRegExp("\\b[A-Za-z0-9_]+(?=\\()");
      rule.format = functionFormat;
      highlightingRules.append(rule);

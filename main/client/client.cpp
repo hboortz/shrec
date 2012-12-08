@@ -1,8 +1,10 @@
 #include "client.h"
+#include <QClipboard>
 
 QString databuf;
 QString filename;
 QTextEdit *editor;
+MainWindow *window;
 int cursor_locked = 0;
 
 
@@ -193,7 +195,7 @@ void insertString(char *msg) {
     QTextCursor tempcursor = editor->textCursor();
     tempcursor.setPosition(pos,QTextCursor::MoveAnchor);
     editor->setTextCursor(tempcursor);
-    editor->insertPlainText(insertString);
+    editor->insertPlainText(insertstring);
     editor->setTextCursor(oldcursor);
     cursor_locked=0;
 }
@@ -208,7 +210,7 @@ void executeEvent(int pos, QString string){
     tempcursor.setPosition(pos,QTextCursor::MoveAnchor);
     editor->setTextCursor(tempcursor);
     if ((string == "bksp")||(string == "del")) {
-        puts("\n\nThat shouldn't happen here!\n")
+        puts("\n\nThat shouldn't happen here!\n");
     } else {
         editor->insertPlainText(string);
     }
@@ -237,6 +239,7 @@ void executeEvent(int pos, QString string){
 int main(int argv, char **args){
     filename=QString("test.txt");
     QApplication app(argv,args);
+    window = new MainWindow();
     Client client;
     if (argv<=1) {
         client.start("127.0.0.1", 8888);
@@ -245,15 +248,14 @@ int main(int argv, char **args){
     }
     databuf=QString();
     editor = new QTextEdit();
-    MainWindow window;
 
-    editor = window.editor;
+    editor = window->editor;
     //printf("Editor: %p, window.editor: %p\n",editor,(window.editor));
     ClientEventFilter *eventFilter = new ClientEventFilter(editor);
     client.connect_signal(eventFilter,editor);
 
     editor->installEventFilter(eventFilter);
-    window.show();
+    window->show();
     //textEdit->show();
 
     return app.exec();

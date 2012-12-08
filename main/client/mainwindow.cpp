@@ -15,6 +15,7 @@ MainWindow::MainWindow()
 {
     editor = new QTextEdit;
 
+
     QWidget *widget = new QWidget;
     setCentralWidget(widget);
 
@@ -25,6 +26,11 @@ MainWindow::MainWindow()
     createActions();
     createMenus();
     setupEditor();
+
+    QPalette* pal = new QPalette();
+    pal->setColor(QPalette::Base,QColor(20,20,20));
+    pal->setColor(QPalette::Text,QColor(255,255,255));
+    editor->setPalette(*pal);
 
     //QString message = tr("A context menu is available by right-clicking");
     //statusBar()->showMessage(message);
@@ -62,42 +68,52 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
 
 void MainWindow::newFile()
 {
-    infoLabel->setText(tr("Invoked <b>File|New</b>"));
 }
 
 void MainWindow::open()
 {
-    infoLabel->setText(tr("Invoked <b>File|Open</b>"));
 }
 
 void MainWindow::print()
 {
-    infoLabel->setText(tr("Invoked <b>File|Print</b>"));
 }
 
 void MainWindow::undo()
 {
-    infoLabel->setText(tr("Invoked <b>Edit|Undo</b>"));
 }
 
 void MainWindow::redo()
 {
-    infoLabel->setText(tr("Invoked <b>Edit|Redo</b>"));
 }
 
 void MainWindow::cut()
 {
-    infoLabel->setText(tr("Invoked <b>Edit|Cut</b>"));
 }
 
 void MainWindow::copy()
 {
-    infoLabel->setText(tr("Invoked <b>Edit|Copy</b>"));
+    puts("testing1");
+    puts("testing2");
+    QTextCursor cursor = editor->textCursor();
+
+    int position = cursor.position();
+    int anchor = cursor.anchor();
+    
+    QClipboard * clipboard = QApplication::clipboard();
+
+    if(position!=anchor) {
+        puts("asdf");
+        clipboard->setText(cursor.selectedText());
+    }
 }
 
 void MainWindow::paste()
 {
     infoLabel->setText(tr("Invoked <b>Edit|Paste</b>"));
+    // QClipboard * clipboard = QApplication::clipboard();
+
+    // writeData(INSERT_STRING, clipboard->getText());
+    //send message to server
 }
 
 void MainWindow::about()

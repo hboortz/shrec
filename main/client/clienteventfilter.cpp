@@ -11,6 +11,20 @@ bool ClientEventFilter::eventFilter(QObject *obj, QEvent *event){
         int nvk = keyEvent->nativeVirtualKey(); //extract NVK (useful because distinct upper/lower values)
         int pos = editor->textCursor().position();
         qDebug("NVK: %d",nvk);
+        int modifiers = keyEvent->nativeModifiers();
+        printf("Modifiers: %i\n",modifiers);
+        if (nvk==99 && modifiers&4) { //because ctrl is determined by 3rd bit
+            puts("Copy");
+            return false;
+        }
+        if (nvk==120 && modifiers&4) {
+            puts("Cut");
+            return true;
+        }
+        if (nvk==118 && modifiers&4) {
+            puts("Paste");
+            return true;
+        }
         if ((nvk>=32 && nvk<=126)||(nvk==65289)||(nvk==65293)) {
             Event textevent = {
                 .nvk = nvk,
