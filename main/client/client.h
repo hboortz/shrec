@@ -40,5 +40,6 @@ void executeEvent(int pos, QString string);
 int receiveEvent(int pos, int event);
 int sendEvent(int pos, int event);
 void removeString(char *msg);
+void insertString(char *msg);
 
 #endif

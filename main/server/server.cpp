@@ -109,7 +109,8 @@ void Server::startRead()
             case KEY_EVENT:
                 receiveEvent(stringToEvent(msg));
                 break;
-            case ADD_STRING:
+            case INSERT_STRING:
+                insertString(msg);
                 break;
             case REMOVE_STRING:
                 removeString(msg);
@@ -195,6 +196,27 @@ void executeEvent(int pos, QString string){
 
 //-----------------------------------------------------------------
 
+void insertString(char *msg) {
+    char *posstring = (char*)malloc(sizeof(char)*10);
+    char *insertstring = (char*)malloc(sizeof(char)*1024);
+    int pos;
+    int possize = strchr(msg,'|') - msg;
+    strncpy(posstring,msg,possize);
+    strcpy(insertstring,msg+possize+1);
+    pos=atoi(posstring);
+
+    if(cursor_locked){
+        exit(-1); //I don't think that this thread should ever spawn race conditions, but you never know.
+    }
+    cursor_locked=1;
+    QTextCursor oldcursor = editor->textCursor();
+    QTextCursor tempcursor = editor->textCursor();
+    tempcursor.setPosition(pos,QTextCursor::MoveAnchor);
+    editor->setTextCursor(tempcursor);
+    editor->insertPlainText(insertString);
+    editor->setTextCursor(oldcursor);
+    cursor_locked=0;
+}
 
 void removeString(char *msg) {
     char *posstring = (char*)malloc(sizeof(char)*10);

@@ -35,6 +35,7 @@ using namespace std;
 //  Figure out a good method of synchronizing cursor positions 
 //  Make filename match the date & time of the first connection
 //  Fix the server event capture code so that it can actually resize.... @_@
+//  Support text overwrite (select text and then type over it)
 
 // Used to record key events
 typedef struct {
@@ -45,7 +46,7 @@ typedef struct {
 // Used to define the type of message sent
 typedef enum {
     KEY_EVENT,
-    ADD_STRING,
+    INSERT_STRING,
     REMOVE_STRING,
     INITIAL_SEND,
     CURSOR_MOVE

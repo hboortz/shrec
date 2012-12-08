@@ -35,5 +35,6 @@ private:
 void executeEvent(int pos, QString string);
 int sendEvent(int pos, int event);
 void removeString(char *msg);
+void insertString(char *msg);
 
 #endif
