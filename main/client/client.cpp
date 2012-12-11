@@ -27,10 +27,9 @@ Client::~Client()
 
 void Client::cursorPositionChanged() {
     if(!*cursor_locked) {
-        puts("sending cursor move");
         Action action = CURSOR_MOVE;
-        char *msg = (char*)malloc(sizeof(char*)*10);
-        sprintf(msg,"%i",editor->textCursor().position());
+        char *msg = (char*)malloc(sizeof(char*)*20);
+        sprintf(msg,"%i|%i",editor->textCursor().position(),editor->textCursor().anchor());
         writeData(action,msg);
     }
 }
@@ -38,6 +37,7 @@ void Client::cursorPositionChanged() {
 void Client::connect_signal(void *ref1, void *ref2){
     connect((ClientEventFilter*)ref1, SIGNAL(signalWrite(Action,char*)),this, SLOT(writeData(Action,char*)));
     connect((QTextEdit*)ref2, SIGNAL(cursorPositionChanged()), this, SLOT(cursorPositionChanged()));
+    connect((QTextEdit*)ref2, SIGNAL(selectionChanged()), this, SLOT(cursorPositionChanged()));
 }
 
 void Client::writeData(Action action, char *msg)
@@ -73,7 +73,6 @@ void Client::startRead()
     int bytesAvail = client.bytesAvailable();
     client.read(buffer, bytesAvail);
     buffer[bytesAvail] = '\0';
-    //@printf("Buffer: %s\n",buffer);
     int bytesPushed=0;
     int *size=(int*)malloc(sizeof(int));
     Action *action = (Action*)malloc(sizeof(int));
@@ -106,8 +105,7 @@ void Client::startRead()
                 initialRead(msg);
                 break;
             case CURSOR_MOVE:
-                printf("received: %s\n",msg);
-                moveRemoteCursor(msg);
+                if(moveRemoteCursor(msg)) cursorPositionChanged();
                 break;
             default:
                 puts("We don't take your kind here.");
@@ -162,16 +160,26 @@ void Client::saveData(){
 
 //---------------------------------------------------------------
 
-void moveRemoteCursor(char *msg) {
-    puts("receiving cursor move");
+//returns 1 if this is a new cursor; 0 otherwise
+int moveRemoteCursor(char *msg) {
     char *ip = (char*)malloc(sizeof(char)*20);
+    char *tempstring = (char*)malloc(sizeof(char)*20);
     char *posstring = (char*)malloc(sizeof(char)*10);
+    char *anchorstring = (char*)malloc(sizeof(char)*10);
+    int size=strlen(msg);
     int pos;
+    int anchor;
     int ipsize = strchr(msg,'|') - msg;
     strncpy(ip,msg,ipsize);
     ip[ipsize]='\0';
-    strcpy(posstring,msg+ipsize+1);
+    strcpy(tempstring,msg+ipsize+1);
+    int possize = strchr(tempstring,'|') - tempstring;
+    strncpy(posstring,tempstring,possize);
+    posstring[possize]='\0';
+    strcpy(anchorstring,tempstring+possize+1);
+    anchorstring[size-possize-ipsize-2]='\0';
     pos=atoi(posstring);
+    anchor=atoi(anchorstring);
 
     int found=0;
     int i;
@@ -184,32 +192,48 @@ void moveRemoteCursor(char *msg) {
                 cursorHighlights.removeAt(i);
             } else {
                 cursorHighlights[i].cursor.setPosition(pos,QTextCursor::MoveAnchor);
-                cursorHighlights[i].cursor.setPosition(pos+1,QTextCursor::KeepAnchor);
+                if(pos==anchor){
+                    cursorHighlights[i].cursor.setPosition(pos+1,QTextCursor::KeepAnchor);
+                } else {
+                    cursorHighlights[i].cursor.setPosition(anchor,QTextCursor::KeepAnchor);
+                }
             }
         }
     }
 
     if(!found) {
-        puts("a wild cursor appeared!");
         //add a new client
         QTextEdit::ExtraSelection highlight;
         highlight.cursor = editor->textCursor();
         highlight.cursor.setPosition(pos,QTextCursor::MoveAnchor);
         highlight.cursor.setPosition(pos+1,QTextCursor::KeepAnchor);
         highlight.format = editor->currentCharFormat();
-        if(pos%2==0){
-            highlight.format.setBackground(Qt::green);
-        }else{
-            highlight.format.setBackground(Qt::red);
-        }
+        highlight.format.setBackground(pickColor(ip));
         cursorIPs.append(ip);
         cursorHighlights.append(highlight);
-        printf("size of highlights: %i\nsize of ips: %i\n",cursorHighlights.size(),cursorIPs.size());
-        printf("relevant ip: %s\n",ip);
     }
 
     editor->setExtraSelections(cursorHighlights);
 
+    return(!found);
+}
+
+QColor pickColor(char *ip) {
+    int len = strlen(ip);
+    int i;
+    int total=0;
+    for(i=0;i<len;i++) {
+        total+=ip[i];
+    }
+    switch(total%6) {
+        case '0': return QColor::fromRgb(40,60,80);
+        case '1': return QColor::fromRgb(60,40,80);
+        case '2': return QColor::fromRgb(40,80,60);
+        case '3': return QColor::fromRgb(17,57,37);
+        case '4': return QColor::fromRgb(17,57,37);
+        case '5': return QColor::fromRgb(17,57,37);
+        default: return QColor::fromRgb(17,57,37);
+    }
 }
 
 void removeString(char *msg) {
@@ -275,33 +299,14 @@ void executeEvent(int pos, QString string){
     }
     editor->setTextCursor(oldcursor);
     *cursor_locked=0;
-
-    //Experimental block of code concerning text highlighting
-    //----------------------------------------------------
-    /*QTextEdit::ExtraSelection highlight;
-    highlight.cursor = editor->textCursor();
-    highlight.cursor.setPosition(pos,QTextCursor::MoveAnchor);
-    highlight.cursor.setPosition(pos+1,QTextCursor::KeepAnchor);
-    highlight.format = editor->currentCharFormat();
-    if(pos%2==0){
-        highlight.format.setBackground(Qt::green);
-    }else{
-        highlight.format.setBackground(Qt::red);
-    }
-    //QList<QTextEdit::ExtraSelection> extras;
-    cursorHighlights << highlight;
-    editor->setExtraSelections(cursorHighlights);*/
-    //editor->repaint();
-    //------------------------------------------------------
-
 }
 
 int main(int argv, char **args){
     filename=QString("test.txt");
     *cursor_locked=0;
     QApplication app(argv,args);
-    window = new MainWindow();
     Client client;
+    window = new MainWindow();
     if (argv<=1) {
         client.start("127.0.0.1", 8888);
     } else {

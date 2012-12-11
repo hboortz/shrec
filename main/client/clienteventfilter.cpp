@@ -32,8 +32,30 @@ bool ClientEventFilter::eventFilter(QObject *obj, QEvent *event){
                 .nvk = nvk,
                 .pos = pos
             };
-            Action action = KEY_EVENT;
-            emit signalWrite(action, eventToString(textevent));
+
+            if(*cursor_locked){
+                exit(-1); //I don't think that this thread should ever spawn race conditions, but you never know.
+            }
+            *cursor_locked=1;
+
+            QTextCursor cursor = editor->textCursor();
+            int position = cursor.position();
+            int anchor = cursor.anchor();
+            Action action;
+            if(position!=anchor) {
+                //overwrite text by deleting it first
+                action=REMOVE_STRING;
+                char *msg = (char*)malloc(sizeof(char)*20);
+                sprintf(msg,"%i|%i",position,anchor);
+                emit signalWrite(action, msg);
+                if(position>anchor) {
+                    textevent.pos=anchor;
+                }
+            }
+                action = KEY_EVENT;
+                emit signalWrite(action, eventToString(textevent));
+            
+            *cursor_locked=0;
         } else if ((nvk==65288)||(nvk==65535)) { //backspace or delete
             Action action = REMOVE_STRING;
             char *msg = (char*)malloc(sizeof(char)*20);

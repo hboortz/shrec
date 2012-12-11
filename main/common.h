@@ -27,16 +27,6 @@
 
 using namespace std;
 
-//TODOS
-//  Fix mallocated sizes with MAX_MSG_SIZE
-//   Make these standard across client and server
-//  Implement ADD_STRING and maybe CURSOR_MOVE
-//  Copy/paste
-//  Figure out a good method of synchronizing cursor positions 
-//  Make filename match the date & time of the first connection
-//  Fix the server event capture code so that it can actually resize.... @_@
-//  Support text overwrite (select text and then type over it)
-
 // Used to record key events
 typedef struct {
     int nvk; //key identifier

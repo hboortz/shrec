@@ -35,7 +35,7 @@ void Server::acceptConnection()
     //add the cursor to other clients' screens
     char *newmsg = (char*)malloc(sizeof(char)*100);
     Action action = CURSOR_MOVE;
-    sprintf(newmsg,"%s|%i",clients.last()->localAddress().toString().toLocal8Bit().data(),0);
+    sprintf(newmsg,"%s|%i|%i",clients.last()->localAddress().toString().toLocal8Bit().data(),0,0);
     addMetadata(action,newmsg);
     broadcastAction(newmsg,clients.last());
     free(newmsg);
@@ -50,7 +50,7 @@ void Server::clientDisconnect() {
             //Clear the cursor from the other clients' screens
             char *newmsg = (char*)malloc(sizeof(char)*100);
             Action action = CURSOR_MOVE;
-            sprintf(newmsg,"%s|%i",clients.at(i)->localAddress().toString().toLocal8Bit().data(),-1);
+            sprintf(newmsg,"%s|%i|%i",clients.at(i)->localAddress().toString().toLocal8Bit().data(),-1,-1);
             addMetadata(action,newmsg);
             broadcastAction(newmsg,clients.at(i));
             free(newmsg);
@@ -88,7 +88,6 @@ void Server::initialWrite(QTcpSocket *client)
 void Server::startRead()
 {
     QTcpSocket *readClient = qobject_cast<QTcpSocket *>(sender());
-    puts("reading");
     char *buffer = (char*)malloc(sizeof(char)*10240);
     int bytesAvail = readClient->bytesAvailable();
     readClient->read(buffer, bytesAvail);
@@ -142,7 +141,6 @@ void Server::startRead()
                 sprintf(newmsg,"%s|%s",readClient->localAddress().toString().toLocal8Bit().data(),msg);
                 addMetadata(*action,newmsg);
                 broadcastAction(newmsg,readClient);
-                puts("broadcasting cursor move");
                 free(newmsg);
                 }
                 break;
@@ -160,6 +158,7 @@ void Server::startRead()
 void Server::broadcastAction(char *string, QTcpSocket *except)
 {
     int i;
+    //printf("%s\n",string);
     //char *string = eventToString(event);
     for(i=0;i<clients.size();i++){
         if(clients[i]!=except) {

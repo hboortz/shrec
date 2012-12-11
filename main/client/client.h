@@ -41,6 +41,7 @@ int receiveEvent(int pos, int event);
 int sendEvent(int pos, int event);
 void removeString(char *msg);
 void insertString(char *msg);
-void moveRemoteCursor(char *msg);
+int moveRemoteCursor(char *msg);
+QColor pickColor(char *ip);
 
 #endif
