@@ -3,14 +3,6 @@
 
 #include "../common.h"
 
-class KeyPressListener: public QObject{
-Q_OBJECT
-public:
-    bool eventFilter(QObject *obj, QEvent *event);
-signals:
-    void signalWrite();
-};
-
 class Server: public QObject
 {
 Q_OBJECT
@@ -19,12 +11,11 @@ public:
   ~Server();
   void connect_signal(void *ref);
   int receiveEvent(Event event);
-  void broadcastAction(char *string);
+  void broadcastAction(char *string, QTcpSocket *except);
   void initialWrite(QTcpSocket *client);
 public slots:
   void acceptConnection();
   void startRead();
-  void writeData();
   void saveData();
   void clientDisconnect();
 private:

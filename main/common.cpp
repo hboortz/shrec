@@ -10,20 +10,18 @@ char *eventToString(Event event)
     strcpy(string,pos);
     strcat(string,"|");
     strcat(string,nvk);
-    printf("%s\n",string);
     return(string);
 }
 
 Event stringToEvent(char *string){
     int size1 = strchr(string,'|')-string;
-    int size2;
+    int size2 = strlen(string)-size1-1;
 
     char *pos = (char*)malloc(sizeof(char)*10);
-    char *nvk = (char*)malloc(sizeof(char)*7);
+    char *nvk = (char*)malloc(sizeof(char)*10);
 
     strncpy(pos,string,size1);
     pos[size1]='\0';
-    size2=strlen(string)-size1-1;
     strncpy(nvk,string+size1+1,size2);
     nvk[size2]='\0';
     Event event = {
@@ -37,7 +35,6 @@ Event stringToEvent(char *string){
 //string format: ####|##|[msg]
 // or: [4-char length]|[2-char action]|[msg]
 void addMetadata(const Action action, char* string){
-    printf("Message length: %i\n",static_cast<int>(strlen(string)));
     char *newstring = (char*)malloc(sizeof(char)*MAX_MSG_SIZE);
     sprintf(newstring,"%.4i|%.2i|%s",static_cast<int>(strlen(string)),action,string);
     strcpy(string, newstring);
@@ -59,11 +56,9 @@ void popMetadata(char **inputString, Action *action, int *size, char **msg){
     strncpy(actionstring,*inputString+5,2);
     actionstring[2]='\0';
     *action = static_cast<Action>(atoi(actionstring));
-    printf("Size of message: %i\n",*size);
     
     *msg = (char*)malloc(sizeof(char)*(*size+5));
     strncpy(*msg,*inputString+8,*size);
     *(*msg+*size) = '\0';
     *inputString+=(*size+8);
-    printf("Pre-return data %s\n",*msg);
 }
