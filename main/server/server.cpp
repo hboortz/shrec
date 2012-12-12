@@ -27,7 +27,7 @@ Server::~Server()
 void Server::acceptConnection()
 {
     clients.append(server.nextPendingConnection());
-    printf("connected to ip %s\n",clients.last()->localAddress().toString().toLocal8Bit().data());
+    printf("connected to ip %s\n",clients.last()->peerAddress().toString().toLocal8Bit().data());
     printf("Number of clients: %i\n",clients.size());
     connect(clients.last(), SIGNAL(readyRead()), this, SLOT(startRead()));
     connect(clients.last(), SIGNAL(disconnected()), this, SLOT(clientDisconnect()));
@@ -36,7 +36,7 @@ void Server::acceptConnection()
     //add the cursor to other clients' screens
     char *newmsg = (char*)malloc(sizeof(char)*100);
     Action action = CURSOR_MOVE;
-    sprintf(newmsg,"%s|%i|%i",clients.last()->localAddress().toString().toLocal8Bit().data(),0,0);
+    sprintf(newmsg,"%s|%i|%i",clients.last()->peerAddress().toString().toLocal8Bit().data(),0,0);
     addMetadata(action,newmsg);
     broadcastAction(newmsg,clients.last());
     //free(newmsg);

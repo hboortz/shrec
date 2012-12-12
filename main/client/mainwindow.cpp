@@ -37,7 +37,7 @@ MainWindow::MainWindow()
     //QString message = tr("A context menu is available by right-clicking");
     //statusBar()->showMessage(message);
 
-    setWindowTitle(tr("Secret-Octo-Ninja"));
+    setWindowTitle(tr("Simultaneous Hardcore Real-time Editing of Code (SHREC)"));
     setMinimumSize(160, 160);
     resize(480, 320);
 }
