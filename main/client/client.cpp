@@ -234,14 +234,15 @@ QColor pickColor(char *ip) {
     for(i=0;i<len;i++) {
         total+=ip[i];
     }
+    printf("total: %i\n",total);
     switch(total%6) {
         case '0': return QColor::fromRgb(40,60,80);
         case '1': return QColor::fromRgb(60,40,80);
         case '2': return QColor::fromRgb(40,80,60);
-        case '3': return QColor::fromRgb(17,57,37);
-        case '4': return QColor::fromRgb(17,57,37);
-        case '5': return QColor::fromRgb(17,57,37);
-        default: return QColor::fromRgb(17,57,37);
+        case '3': return QColor::fromRgb(60,80,40);
+        case '4': return QColor::fromRgb(80,40,60);
+        case '5': return QColor::fromRgb(80,60,40);
+        default: return QColor::fromRgb(40,60,80);
     }
 }
 
