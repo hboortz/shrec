@@ -49,11 +49,11 @@
      rule.format = dataTypeModifier;
      highlightingRules.append(rule);
 
-     /*classFormat.setFontWeight(QFont::Bold);
+     classFormat.setFontWeight(QFont::Bold);
      classFormat.setForeground(Qt::darkMagenta);
-     rule.pattern = QRegExp("\\bQ[A-Za-z]+\\b");
+     rule.pattern = QRegExp("#include[^\n]*");
      rule.format = classFormat;
-     highlightingRules.append(rule);*/
+     highlightingRules.append(rule);
 
      singleLineCommentFormat.setForeground(Qt::red);
      rule.pattern = QRegExp("//[^\n]*");
