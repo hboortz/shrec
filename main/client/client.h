@@ -23,6 +23,7 @@ public slots:
   void writeData(Action action, char *msg);
   void cursorPositionChanged();
   void saveData();
+  void quit();
 private:
   QTcpSocket client;
 };

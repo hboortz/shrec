@@ -59,9 +59,15 @@ void Client::start(QString address, quint16 port)
     client.connectToHost(addr, port);
 }
 
+void Client::quit() {
+    puts("\nDisconnected from the server!");
+    exit(-1);
+}
+
 void Client::init()
 {
     connect(&client, SIGNAL(readyRead()), this, SLOT(startRead()));
+    connect(&client, SIGNAL(disconnected()), this, SLOT(quit()));
     printf("connected to IP %s\n",client.localAddress().toString().toLocal8Bit().data());
     editor->setPlainText("");
     QTextCursor cursor = editor->textCursor();

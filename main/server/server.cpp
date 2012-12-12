@@ -28,6 +28,7 @@ void Server::acceptConnection()
 {
     clients.append(server.nextPendingConnection());
     printf("connected to ip %s\n",clients.last()->localAddress().toString().toLocal8Bit().data());
+    printf("Number of clients: %i\n",clients.size());
     connect(clients.last(), SIGNAL(readyRead()), this, SLOT(startRead()));
     connect(clients.last(), SIGNAL(disconnected()), this, SLOT(clientDisconnect()));
     initialWrite(clients.last());
@@ -38,7 +39,7 @@ void Server::acceptConnection()
     sprintf(newmsg,"%s|%i|%i",clients.last()->localAddress().toString().toLocal8Bit().data(),0,0);
     addMetadata(action,newmsg);
     broadcastAction(newmsg,clients.last());
-    free(newmsg);
+    //free(newmsg);
 }
 
 void Server::clientDisconnect() {
@@ -53,7 +54,7 @@ void Server::clientDisconnect() {
             sprintf(newmsg,"%s|%i|%i",clients.at(i)->localAddress().toString().toLocal8Bit().data(),-1,-1);
             addMetadata(action,newmsg);
             broadcastAction(newmsg,clients.at(i));
-            free(newmsg);
+            //free(newmsg);
 
             clients.removeAt(i);
             puts("client disconnected");
@@ -141,7 +142,7 @@ void Server::startRead()
                 sprintf(newmsg,"%s|%s",readClient->localAddress().toString().toLocal8Bit().data(),msg);
                 addMetadata(*action,newmsg);
                 broadcastAction(newmsg,readClient);
-                free(newmsg);
+                //free(newmsg);
                 }
                 break;
             default:

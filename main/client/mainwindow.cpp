@@ -110,7 +110,7 @@ void MainWindow::paste()
     QTextCursor cursor = editor->textCursor();
     int position = cursor.position();
     Action action = INSERT_STRING;
-    char *msg = (char *) malloc(sizeof(char)*0);
+    char *msg = (char *) malloc(sizeof(char)*1024);
     sprintf(msg, "%i|%s",position,clipboard->text().toLocal8Bit().data());
 
     emit signalWrite(action, msg);
