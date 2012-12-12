@@ -14,7 +14,7 @@ public:
   Client(QObject* parent = 0);
   ~Client();
   void start(QString address, quint16 port);
-  void connect_signal(void *ref1, void *ref2);
+  void connect_signal(ClientEventFilter *eventFilter, MainWindow *window);
   int receiveEvent(Event event);
   void initialRead(char *msg);
 public slots:

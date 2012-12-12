@@ -34,10 +34,13 @@ void Client::cursorPositionChanged() {
     }
 }
 
-void Client::connect_signal(void *ref1, void *ref2){
-    connect((ClientEventFilter*)ref1, SIGNAL(signalWrite(Action,char*)),this, SLOT(writeData(Action,char*)));
-    connect((QTextEdit*)ref2, SIGNAL(cursorPositionChanged()), this, SLOT(cursorPositionChanged()));
-    connect((QTextEdit*)ref2, SIGNAL(selectionChanged()), this, SLOT(cursorPositionChanged()));
+void Client::connect_signal(ClientEventFilter *eventFilter, MainWindow *window){
+    connect(eventFilter, SIGNAL(signalWrite(Action,char*)),this, SLOT(writeData(Action,char*)));
+    connect(editor, SIGNAL(cursorPositionChanged()), this, SLOT(cursorPositionChanged()));
+    connect(editor, SIGNAL(selectionChanged()), this, SLOT(cursorPositionChanged()));
+    connect(window, SIGNAL(signalWrite(Action,char*)),this,SLOT(writeData(Action, char*)));
+    connect(eventFilter, SIGNAL(cut()), window, SLOT(cut()));
+    connect(eventFilter, SIGNAL(paste()), window, SLOT(paste()));
 }
 
 void Client::writeData(Action action, char *msg)
@@ -318,7 +321,7 @@ int main(int argv, char **args){
     editor = window->editor;
     //printf("Editor: %p, window.editor: %p\n",editor,(window.editor));
     ClientEventFilter *eventFilter = new ClientEventFilter(editor,cursor_locked);
-    client.connect_signal(eventFilter,editor);
+    client.connect_signal(eventFilter,window);
 
     editor->installEventFilter(eventFilter);
     window->show();

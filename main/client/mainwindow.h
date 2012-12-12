@@ -11,6 +11,8 @@
 
 #include <QMainWindow>
 #include "highlighter.h"
+#include "../common.h"
+#include <QClipboard>
 
 class QAction;
 class QActionGroup;
@@ -28,17 +30,10 @@ public:
 protected:
     void contextMenuEvent(QContextMenuEvent *event);
 
-private slots:
-    void newFile();
-    void open();
-    void print();
-    void undo();
-    void redo();
+public slots:
     void cut();
     void copy();
     void paste();
-    void about();
-    void aboutQt();
 
 private:
     void createActions();
@@ -48,20 +43,15 @@ private:
     Highlighter *highlighter;
     QMenu *fileMenu;
     QMenu *editMenu;
-    QMenu *helpMenu;
-    //QActionGroup *alignmentGroup;
-    QAction *newAct;
-    QAction *openAct;
-    QAction *printAct;
     QAction *exitAct;
     QAction *undoAct;
     QAction *redoAct;
     QAction *cutAct;
     QAction *copyAct;
     QAction *pasteAct;
-    QAction *aboutAct;
-    QAction *aboutQtAct;
-    QLabel *infoLabel;
+
+signals:
+    void signalWrite(Action action, char *msg);
 };
 
 #endif

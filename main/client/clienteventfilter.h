@@ -14,5 +14,7 @@ private:
 
 signals:
   void signalWrite(Action action, char *msg);
+  void cut();
+  void paste();
 };
 #endif

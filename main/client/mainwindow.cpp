@@ -8,7 +8,7 @@
 #include <QtGui>
 
 #include "mainwindow.h"
-
+#include <string>
 
 
 MainWindow::MainWindow()
@@ -22,6 +22,8 @@ MainWindow::MainWindow()
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(editor);
     widget->setLayout(layout);
+
+
 
     createActions();
     createMenus();
@@ -66,34 +68,9 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
     menu.exec(event->globalPos());
 }
 
-void MainWindow::newFile()
-{
-}
-
-void MainWindow::open()
-{
-}
-
-void MainWindow::print()
-{
-}
-
-void MainWindow::undo()
-{
-}
-
-void MainWindow::redo()
-{
-}
 
 void MainWindow::cut()
 {
-}
-
-void MainWindow::copy()
-{
-    puts("testing1");
-    puts("testing2");
     QTextCursor cursor = editor->textCursor();
 
     int position = cursor.position();
@@ -102,64 +79,49 @@ void MainWindow::copy()
     QClipboard * clipboard = QApplication::clipboard();
 
     if(position!=anchor) {
-        puts("asdf");
+        clipboard->setText(cursor.selectedText());
+    }
+
+    Action action = REMOVE_STRING;
+    char *msg = (char *) malloc(sizeof(char)*20);
+    sprintf(msg, "%i|%i",position,anchor);
+    emit signalWrite(action, msg);
+
+}
+
+void MainWindow::copy()
+{
+    QTextCursor cursor = editor->textCursor();
+
+    int position = cursor.position();
+    int anchor = cursor.anchor();
+    
+    QClipboard * clipboard = QApplication::clipboard();
+
+    if(position!=anchor) {
         clipboard->setText(cursor.selectedText());
     }
 }
 
 void MainWindow::paste()
 {
-    infoLabel->setText(tr("Invoked <b>Edit|Paste</b>"));
-    // QClipboard * clipboard = QApplication::clipboard();
+    QClipboard * clipboard = QApplication::clipboard();
 
-    // writeData(INSERT_STRING, clipboard->getText());
-    //send message to server
-}
+    QTextCursor cursor = editor->textCursor();
+    int position = cursor.position();
+    Action action = INSERT_STRING;
+    char *msg = (char *) malloc(sizeof(char)*0);
+    sprintf(msg, "%i|%s",position,clipboard->text().toLocal8Bit().data());
 
-void MainWindow::about()
-{
-    infoLabel->setText(tr("Invoked <b>Help|About</b>"));
-    QMessageBox::about(this, tr("About Menu"),
-            tr("The <b>Menu</b> example shows how to create "
-                "menu-bar menus and context menus."));
-}
-
-void MainWindow::aboutQt()
-{
-    infoLabel->setText(tr("Invoked <b>Help|About Qt</b>"));
+    emit signalWrite(action, msg);
 }
 
 void MainWindow::createActions()
 {
-    newAct = new QAction(tr("&New"), this);
-    newAct->setShortcuts(QKeySequence::New);
-    newAct->setStatusTip(tr("Create a new file"));
-    connect(newAct, SIGNAL(triggered()), this, SLOT(newFile()));
-
-    openAct = new QAction(tr("&Open..."), this);
-    openAct->setShortcuts(QKeySequence::Open);
-    openAct->setStatusTip(tr("Open an existing file"));
-    connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
-
-    printAct = new QAction(tr("&Print..."), this);
-    printAct->setShortcuts(QKeySequence::Print);
-    printAct->setStatusTip(tr("Print the document"));
-    connect(printAct, SIGNAL(triggered()), this, SLOT(print()));
-
-    exitAct = new QAction(tr("E&xit"), this);
+    exitAct = new QAction(tr("&Exit"), this);
     exitAct->setShortcuts(QKeySequence::Quit);
     exitAct->setStatusTip(tr("Exit the application"));
     connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
-
-    undoAct = new QAction(tr("&Undo"), this);
-    undoAct->setShortcuts(QKeySequence::Undo);
-    undoAct->setStatusTip(tr("Undo the last operation"));
-    connect(undoAct, SIGNAL(triggered()), this, SLOT(undo()));
-
-    redoAct = new QAction(tr("&Redo"), this);
-    redoAct->setShortcuts(QKeySequence::Redo);
-    redoAct->setStatusTip(tr("Redo the last operation"));
-    connect(redoAct, SIGNAL(triggered()), this, SLOT(redo()));
 
     cutAct = new QAction(tr("Cu&t"), this);
     cutAct->setShortcuts(QKeySequence::Cut);
@@ -179,35 +141,17 @@ void MainWindow::createActions()
                 "selection"));
     connect(pasteAct, SIGNAL(triggered()), this, SLOT(paste()));
 
-    aboutAct = new QAction(tr("&About"), this);
-    aboutAct->setStatusTip(tr("Show the application's About box"));
-    connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
-
-    aboutQtAct = new QAction(tr("About &Qt"), this);
-    aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
-    connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
-    connect(aboutQtAct, SIGNAL(triggered()), this, SLOT(aboutQt()));
 }
 
 void MainWindow::createMenus()
 {
     fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction(newAct);
-    fileMenu->addAction(openAct);
-    fileMenu->addAction(printAct);
-    fileMenu->addSeparator();
     fileMenu->addAction(exitAct);
 
     editMenu = menuBar()->addMenu(tr("&Edit"));
-    editMenu->addAction(undoAct);
-    editMenu->addAction(redoAct);
     editMenu->addSeparator();
     editMenu->addAction(cutAct);
     editMenu->addAction(copyAct);
     editMenu->addAction(pasteAct);
     editMenu->addSeparator();
-
-    helpMenu = menuBar()->addMenu(tr("&Help"));
-    helpMenu->addAction(aboutAct);
-    helpMenu->addAction(aboutQtAct);
 }

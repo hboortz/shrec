@@ -21,10 +21,12 @@ bool ClientEventFilter::eventFilter(QObject *obj, QEvent *event){
         }
         if (nvk==120 && modifiers&4) {
             puts("Cut");
+            emit cut();
             return true;
         }
         if (nvk==118 && modifiers&4) {
             puts("Paste");
+            emit paste();
             return true;
         }
         if ((nvk>=32 && nvk<=126)||(nvk==65289)||(nvk==65293)) {
