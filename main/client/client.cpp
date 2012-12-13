@@ -159,6 +159,11 @@ int Client::receiveEvent(Event event){
 void Client::saveData(){
     QString contents = QString(editor->toPlainText());
     FILE *file;
+
+    window->updateFileName();
+    filename=QString(window->fileName);
+    //puts(filename.toLocal8Bit().data());
+
     file = fopen(filename.toLocal8Bit().data(),"w+");
     QFile qfile;
     qfile.open(file,QIODevice::WriteOnly);
@@ -312,11 +317,15 @@ void executeEvent(int pos, QString string){
 }
 
 int main(int argv, char **args){
-    filename=QString("test.txt");
+    //filename=QString("test.txt");
     *cursor_locked=0;
     QApplication app(argv,args);
     Client client;
     window = new MainWindow();
+    window->updateFileName();
+    filename=QString(window->fileName);
+    //puts(filename.toLocal8Bit().data());
+
     if (argv<=1) {
         client.start("127.0.0.1", 8888);
     } else {

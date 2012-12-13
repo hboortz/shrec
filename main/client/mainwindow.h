@@ -13,6 +13,8 @@
 #include "highlighter.h"
 #include "../common.h"
 #include <QClipboard>
+#include <QLineEdit>
+#include <QLabel>
 
 class QAction;
 class QActionGroup;
@@ -26,14 +28,20 @@ class MainWindow : public QMainWindow
 public:
     MainWindow();
     QTextEdit *editor;
+    QLineEdit *nameFile;
+    QString fileName;
+    void updateFileName();
 
 protected:
     void contextMenuEvent(QContextMenuEvent *event);
 
 public slots:
+    void saveAs();
     void cut();
     void copy();
     void paste();
+
+
 
 private:
     void createActions();
@@ -43,6 +51,7 @@ private:
     Highlighter *highlighter;
     QMenu *fileMenu;
     QMenu *editMenu;
+    QAction *saveAsAct;
     QAction *exitAct;
     QAction *undoAct;
     QAction *redoAct;

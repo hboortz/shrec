@@ -19,11 +19,17 @@ MainWindow::MainWindow()
     QWidget *widget = new QWidget;
     setCentralWidget(widget);
 
+    fileName = QString("userCode.cpp");
+    nameFile = new QLineEdit(fileName);
+    QLabel *infoLabel = new QLabel("<i>File Name</i>");
+
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(editor);
+    layout->addWidget(infoLabel);
+    layout->addWidget(nameFile);
     widget->setLayout(layout);
 
-
+    //fileName = nameFile.text() //need to update this every time it saves
 
     createActions();
     createMenus();
@@ -34,12 +40,16 @@ MainWindow::MainWindow()
     pal->setColor(QPalette::Text,QColor(255,255,255));
     editor->setPalette(*pal);
 
-    //QString message = tr("A context menu is available by right-clicking");
-    //statusBar()->showMessage(message);
 
     setWindowTitle(tr("Simultaneous Hardcore Real-time Editing of Code (SHREC)"));
     setMinimumSize(160, 160);
     resize(480, 320);
+}
+
+void MainWindow::updateFileName()
+{
+    fileName = nameFile->text();
+
 }
 
 void MainWindow::setupEditor()
@@ -68,6 +78,34 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
     menu.exec(event->globalPos());
 }
 
+void MainWindow::saveAs()
+{
+    // QLineEdit *nameFile = new QLineEdit(fileName);
+
+    // QWidget *saveWidget = new QWidget;
+    // setCentralWidget(saveWidget);
+
+    // QLabel *infoLabel = new QLabel("<i>Enter the name of your file. 
+    //     Press enter to save and return to editing your file</i>");
+
+    // QVBoxLayout *saveLayout = new QVBoxLayout;
+    // layout->addWidget(infoLabel);
+    // layout->addWidget(nameFile);
+    // widget->setLayout(layout);
+    
+    // setWindowTitle(tr("Filename"));
+
+    // nameFile->show();
+
+    // if (nameFile::editingFinished()){
+    //    fileName = nameFile.text();
+    //     QLineEdit::~QlineEdit();
+    // }
+
+
+
+
+}
 
 void MainWindow::cut()
 {
@@ -118,6 +156,11 @@ void MainWindow::paste()
 
 void MainWindow::createActions()
 {
+    saveAsAct = new QAction(tr("&Save As"), this);
+    //saveAsAct->setShortcuts(QKeySequence::saveAs);
+    saveAsAct->setStatusTip(tr("Save the content of the application"));
+    connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
+
     exitAct = new QAction(tr("&Exit"), this);
     exitAct->setShortcuts(QKeySequence::Quit);
     exitAct->setStatusTip(tr("Exit the application"));
@@ -146,6 +189,7 @@ void MainWindow::createActions()
 void MainWindow::createMenus()
 {
     fileMenu = menuBar()->addMenu(tr("&File"));
+    //fileMenu->addAction(saveAsAct);
     fileMenu->addAction(exitAct);
 
     editMenu = menuBar()->addMenu(tr("&Edit"));
