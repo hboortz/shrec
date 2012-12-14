@@ -68,7 +68,7 @@ void Client::init()
 {
     connect(&client, SIGNAL(readyRead()), this, SLOT(startRead()));
     connect(&client, SIGNAL(disconnected()), this, SLOT(quit()));
-    printf("connected to IP %s\n",client.localAddress().toString().toLocal8Bit().data());
+    printf("connected to IP %s\n",client.peerAddress().toString().toLocal8Bit().data());
     editor->setPlainText("");
     QTextCursor cursor = editor->textCursor();
     cursor.setPosition(0,QTextCursor::MoveAnchor);
