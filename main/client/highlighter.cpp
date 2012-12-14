@@ -29,6 +29,11 @@
          highlightingRules.append(rule);
      }
 
+     loops.setForeground(Qt::green);
+     rule.pattern = QRegExp("\\bwhile\\b|\\bfor\\b|\\bif\\b|\\elseif\\b|\\bforeach\\b|\\belse\\b");
+     rule.format = loops;
+     highlightingRules.append(rule);
+
      structs.setForeground(Qt::magenta);
      rule.pattern = QRegExp("\\btypedef\\b|\\bunion\\b|\\bstruct\\b");
      rule.format = structs;

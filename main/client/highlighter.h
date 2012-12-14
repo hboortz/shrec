@@ -39,6 +39,7 @@
      QRegExp commentStartExpression;
      QRegExp commentEndExpression;
      QTextCharFormat keywordFormat;
+     QTextCharFormat loops;
      QTextCharFormat structs;
      QTextCharFormat funcType;
      QTextCharFormat dataType;
